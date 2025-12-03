@@ -14,10 +14,11 @@ import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
 
 const ClassifyGanFingerprintInputSchema = z.object({
-  imageDataUri: z
+  mediaDataUri: z
     .string()
     .describe(
-      'The AI-generated image as a data URI that must include a MIME type and use Base64 encoding. Expected format: \'data:<mimetype>;base64,<encoded_data>\'.'    ),
+      'The AI-generated media (image, video, or audio) as a data URI that must include a MIME type and use Base64 encoding. Expected format: \'data:<mimetype>;base64,<encoded_data>\'.'
+    ),
 });
 
 export type ClassifyGanFingerprintInput = z.infer<typeof ClassifyGanFingerprintInputSchema>;
@@ -30,7 +31,7 @@ const ForensicIndicatorSchema = z.object({
 const ClassifyGanFingerprintOutputSchema = z.object({
   sourceModel: z
     .string()
-    .describe('The source model (e.g., Stable Diffusion, DALL·E) used to generate the image.')
+    .describe('The source model (e.g., Stable Diffusion, DALL·E, Sora, Udio) used to generate the media.')
     .optional(),
   confidence: z
     .number()
@@ -56,19 +57,19 @@ const classifyGanFingerprintPrompt = ai.definePrompt({
   name: 'classifyGanFingerprintPrompt',
   input: {schema: ClassifyGanFingerprintInputSchema},
   output: {schema: ClassifyGanFingerprintOutputSchema},
-  prompt: `You are an expert in identifying the source of AI-generated images by analyzing their GAN fingerprints.
+  prompt: `You are an expert in identifying the source of AI-generated media by analyzing their generative model fingerprints.
 
-  Analyze the provided image and determine the most likely source model used to generate it.  Consider factors such as image artifacts, frequency patterns, and other distinguishing characteristics.
+  Analyze the provided media file (image, video, or audio) and determine the most likely source model used to generate it. Consider factors such as image/video artifacts, audio spectrogram patterns, frequency spectrum, and other distinguishing characteristics unique to different generative models.
 
   Provide:
-  1. The name of the source model (e.g., Stable Diffusion, DALL·E).
+  1. The name of the source model (e.g., Stable Diffusion, DALL·E, Sora, Gen-2, Udio, Suno).
   2. A confidence level (0-1) for the classification.
-  3. A list of scores for the following forensic indicators related to source identification: 'Residual Noise Patterns', 'Up-sampling Artifacts', 'Color Space Aberrations', 'Model-specific Artifacts'. Each score should be a number between 0 and 1, where a higher score indicates a stronger presence of that indicator.
+  3. A list of scores for the following forensic indicators related to source identification: 'Residual Noise Patterns', 'Up-sampling Artifacts', 'Color Space Aberrations', 'Model-specific Artifacts', 'Spectrogram Anomalies', 'Codec Fingerprints'. Each score should be a number between 0 and 1, where a higher score indicates a stronger presence of that indicator.
   4. Additional details about the analysis.
 
   If the source model cannot be confidently determined, indicate that the source is unknown and provide any relevant details about why the classification is uncertain.
 
-  Image: {{media url=imageDataUri}}
+  Media: {{media url=mediaDataUri}}
   `,
 });
 

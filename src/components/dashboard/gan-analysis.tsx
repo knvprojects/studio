@@ -20,13 +20,29 @@ interface GanAnalysisProps {
 
 export function GanAnalysis({ fileDataUri, result, isLoading, onFileSelect, resetState }: GanAnalysisProps) {
   const forensicIndicators = result?.forensicIndicators || [];
+  const fileType = fileDataUri ? fileDataUri.split(':')[1].split('/')[0] : null;
+
+  const renderMedia = () => {
+    if (!fileDataUri) return null;
+
+    switch (fileType) {
+      case 'image':
+        return <Image src={fileDataUri} alt="Uploaded content" fill objectFit="contain" />;
+      case 'video':
+        return <video src={fileDataUri} controls className="h-full w-full" />;
+      case 'audio':
+        return <audio src={fileDataUri} controls className="h-full w-full" />;
+      default:
+        return <p className="text-center text-muted-foreground">Unsupported file type for preview.</p>;
+    }
+  }
 
   return (
     <Card className="shadow-lg">
       <CardHeader className="flex flex-row items-start justify-between">
         <div>
             <CardTitle>GAN Fingerprint Analysis</CardTitle>
-            <CardDescription>Upload an AI-generated image to identify the source model (e.g., DALL·E, Stable Diffusion) by analyzing its unique GAN fingerprint.</CardDescription>
+            <CardDescription>Upload an AI-generated image, video, or audio file to identify the source model (e.g., DALL·E, Sora, Udio) by analyzing its unique generative fingerprint.</CardDescription>
         </div>
         {(fileDataUri || result || isLoading) && (
           <Button variant="ghost" size="icon" onClick={resetState} aria-label="Clear analysis">
@@ -51,8 +67,8 @@ export function GanAnalysis({ fileDataUri, result, isLoading, onFileSelect, rese
             </div>
         ) : result && fileDataUri && (
              <div className="space-y-8">
-                 <div className="relative aspect-video w-full max-w-md mx-auto overflow-hidden rounded-lg border bg-muted">
-                    <Image src={fileDataUri} alt="Uploaded image" fill objectFit="contain" />
+                 <div className="relative aspect-video w-full max-w-md mx-auto overflow-hidden rounded-lg border bg-muted flex items-center justify-center">
+                    {renderMedia()}
                 </div>
                  <div className="flex flex-col gap-4">
                     <h3 className="font-semibold text-lg border-b pb-2">Fingerprint Report</h3>

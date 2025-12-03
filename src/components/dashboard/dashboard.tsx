@@ -124,15 +124,6 @@ export function Dashboard() {
 
 
   const onGanFileSelect = async (dataUri: string, file: File) => {
-    if (!file.type.startsWith("image/")) {
-        toast({
-            variant: "destructive",
-            title: "Unsupported File Type",
-            description: "GAN Fingerprint analysis currently supports image files only.",
-        });
-        return;
-    }
-
     setGanState({ fileDataUri: dataUri, result: null, isLoading: true });
 
     try {
