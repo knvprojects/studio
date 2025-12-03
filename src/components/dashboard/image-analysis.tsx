@@ -50,29 +50,46 @@ export function ImageAnalysis() {
         <CardTitle>AI-Generated Image Detection</CardTitle>
         <CardDescription>Upload an image to check for signs of AI generation using various forensic analysis techniques.</CardDescription>
       </CardHeader>
-      <CardContent>
-        <div className="grid md:grid-cols-2 gap-8">
-            <div className="flex flex-col gap-4">
-              <h3 className="font-semibold text-lg border-b pb-2">Upload Media</h3>
-              {!fileDataUri && !isLoading && <FileUploader onFileSelect={onFileSelect} accept="image/*" fileTypeDescription="image" />}
-              
-              {(fileDataUri || isLoading) && (
-                <div className="relative aspect-video w-full overflow-hidden rounded-lg border bg-muted max-w-lg mx-auto">
-                  {fileDataUri ? <Image src={fileDataUri} alt="Uploaded image" fill objectFit="contain" /> : <div className="w-full h-full bg-muted animate-pulse"></div>}
-                </div>
+      <CardContent className="space-y-8">
+        <div className="flex flex-col items-center gap-4">
+          <h3 className="w-full text-lg font-semibold border-b pb-2">Upload Image</h3>
+          {!fileDataUri && !isLoading && (
+            <FileUploader
+              onFileSelect={onFileSelect}
+              accept="image/*"
+              fileTypeDescription="image"
+            />
+          )}
+
+          {(fileDataUri || isLoading) && (
+            <div className="relative aspect-video w-full max-w-md overflow-hidden rounded-lg border bg-muted">
+              {fileDataUri ? (
+                <Image
+                  src={fileDataUri}
+                  alt="Uploaded image"
+                  fill
+                  objectFit="contain"
+                />
+              ) : (
+                <div className="h-full w-full animate-pulse bg-muted"></div>
               )}
-          </div>
-          <div className="flex flex-col gap-4">
+            </div>
+          )}
+        </div>
+
+        {(isLoading || result) && (
+           <div className="flex flex-col gap-4">
               <h3 className="font-semibold text-lg border-b pb-2">Analysis Report</h3>
               {isLoading && <AnalysisSkeleton />}
               {result && fileDataUri && <AnalysisResultDisplay image={fileDataUri} result={result} onReset={resetState} />}
-              {!isLoading && !result && (
-                <div className="flex flex-col items-center justify-center h-full text-center p-8 border border-dashed rounded-lg bg-card text-muted-foreground">
-                    <p>Upload an image to see the analysis results.</p>
-                </div>
-              )}
           </div>
-        </div>
+        )}
+        
+        {!isLoading && !result && !fileDataUri && (
+          <div className="flex flex-col items-center justify-center h-full text-center p-8 border border-dashed rounded-lg bg-card text-muted-foreground">
+              <p>Upload an image to see the analysis results.</p>
+          </div>
+        )}
       </CardContent>
     </Card>
   );
