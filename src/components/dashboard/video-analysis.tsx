@@ -50,18 +50,20 @@ export function VideoAnalysis() {
         <CardDescription>Upload a video to detect deepfake indicators like unnatural blinking, pose mismatch, and lip-sync issues.</CardDescription>
       </CardHeader>
       <CardContent>
-        <div className="flex flex-col gap-8">
-          <div className="w-full max-w-lg mx-auto flex flex-col gap-4">
-            {!fileDataUri && !isLoading && <FileUploader onFileSelect={onFileSelect} accept="video/*" fileTypeDescription="video" />}
-            {(fileDataUri || isLoading) && (
-              <div className="relative aspect-video w-full overflow-hidden rounded-lg border bg-black">
-                {fileDataUri ? <video src={fileDataUri} controls className="w-full h-full" /> : <div className="w-full h-full bg-muted animate-pulse"></div>}
-              </div>
-            )}
+        <div className="grid md:grid-cols-2 gap-8">
+          <div className="flex flex-col gap-4">
+              <h3 className="font-semibold text-lg border-b pb-2">Upload Media</h3>
+              {!fileDataUri && !isLoading && <FileUploader onFileSelect={onFileSelect} accept="video/*" fileTypeDescription="video" />}
+
+              {(fileDataUri || isLoading) && (
+                <div className="relative aspect-video w-full overflow-hidden rounded-lg border bg-black max-w-lg mx-auto">
+                  {fileDataUri ? <video src={fileDataUri} controls className="w-full h-full" /> : <div className="w-full h-full bg-muted animate-pulse"></div>}
+                </div>
+              )}
           </div>
-          {(isLoading || result) && (
-            <div className="flex flex-col gap-4">
-              <h3 className="font-semibold text-lg border-b pb-2 mb-4">Analysis Report</h3>
+          
+          <div className="flex flex-col gap-4">
+              <h3 className="font-semibold text-lg border-b pb-2">Analysis Report</h3>
               {isLoading && <AnalysisSkeleton />}
               {result && fileDataUri && <AnalysisResultDisplay video={fileDataUri} result={result} onReset={resetState} />}
               {!isLoading && !result && (
@@ -69,8 +71,7 @@ export function VideoAnalysis() {
                     <p>Upload a video to see the analysis results.</p>
                 </div>
               )}
-            </div>
-          )}
+          </div>
         </div>
       </CardContent>
     </Card>

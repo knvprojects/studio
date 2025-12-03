@@ -15,3 +15,5 @@ export type ImageAnalysisResult = AnalyzeUploadedImageOutput & {
 export type VideoAnalysisResult = ProcessVideoForDeepfakesOutput & {
   forensicIndicators: ForensicIndicator[];
 };
+
+export type { ClassifyGanFingerprintOutput };
