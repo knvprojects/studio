@@ -5,7 +5,6 @@ import type { ImageAnalysisResult, VideoAnalysisResult } from '@/lib/types';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { AlertTriangle, BarChart3, Fingerprint, RefreshCcw, Printer, FileText } from 'lucide-react';
-import { PrintReport } from './print-report';
 import { Progress } from '@/components/ui/progress';
 
 interface AnalysisResultDisplayProps {
@@ -27,7 +26,8 @@ export function AnalysisResultDisplay({ result, onReset, image, video }: Analysi
   const percentage = Math.round(probability * 100);
 
   const handlePrint = () => {
-    window.print();
+    const event = new CustomEvent('print-report', { detail: { image, video, result } });
+    window.dispatchEvent(event);
   };
 
   return (
@@ -124,9 +124,6 @@ export function AnalysisResultDisplay({ result, onReset, image, video }: Analysi
             </Card>
           )}
         </div>
-      </div>
-      <div className="hidden">
-        <PrintReport image={image} video={video} result={result} />
       </div>
     </>
   );
