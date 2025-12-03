@@ -36,7 +36,7 @@ export function GanAnalysis({ fileDataUri, result, isLoading, onFileSelect, rese
       </CardHeader>
       <CardContent className="space-y-8">
         {!fileDataUri && !isLoading ? (
-            <FileUploader onFileSelect={onFileSelect} accept="*/*" fileTypeDescription="any file" />
+            <FileUploader onFileSelect={onFileSelect} accept="*/*" fileTypeDescription="file" />
         ) : isLoading ? (
             <div className="space-y-8">
                 <div className="relative aspect-video w-full max-w-md mx-auto overflow-hidden rounded-lg border bg-muted">
