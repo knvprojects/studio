@@ -1,48 +1,21 @@
 
 'use client';
 
-import { useState } from 'react';
-import { handleVideoAnalysis } from '@/lib/actions';
 import type { VideoAnalysisResult } from '@/lib/types';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { FileUploader } from './file-uploader';
 import { AnalysisResultDisplay } from './analysis-result';
-import { useToast } from '@/hooks/use-toast';
 import { AnalysisSkeleton } from './analysis-skeleton';
 
-export function VideoAnalysis() {
-  const [fileDataUri, setFileDataUri] = useState<string | null>(null);
-  const [result, setResult] = useState<VideoAnalysisResult | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
-  const { toast } = useToast();
+interface VideoAnalysisProps {
+  fileDataUri: string | null;
+  result: VideoAnalysisResult | null;
+  isLoading: boolean;
+  onFileSelect: (dataUri: string, file: File) => Promise<void>;
+  resetState: () => void;
+}
 
-  const onFileSelect = async (dataUri: string) => {
-    setFileDataUri(dataUri);
-    setResult(null);
-    setIsLoading(true);
-
-    try {
-      const analysisResult = await handleVideoAnalysis(dataUri);
-      setResult(analysisResult);
-    } catch (error) {
-      toast({
-        variant: 'destructive',
-        title: 'Analysis Failed',
-        description: error instanceof Error ? error.message : 'An unknown error occurred.',
-      });
-      // Reset on failure to allow retry
-      resetState();
-    } finally {
-      setIsLoading(false);
-    }
-  };
-  
-  const resetState = () => {
-    setFileDataUri(null);
-    setResult(null);
-    setIsLoading(false);
-  }
-
+export function VideoAnalysis({ fileDataUri, result, isLoading, onFileSelect, resetState }: VideoAnalysisProps) {
   return (
     <Card className="shadow-lg">
       <CardHeader>

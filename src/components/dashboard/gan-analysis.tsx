@@ -1,59 +1,23 @@
 // src/components/dashboard/gan-analysis.tsx
 'use client';
 
-import { useState } from 'react';
 import Image from 'next/image';
-import { handleGanFingerprintAnalysis } from '@/lib/actions';
 import type { ClassifyGanFingerprintOutput } from '@/lib/types';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { FileUploader } from './file-uploader';
-import { useToast } from '@/hooks/use-toast';
 import { Fingerprint, RefreshCcw } from 'lucide-react';
 import { Button } from '../ui/button';
-import { AnalysisSkeleton } from './analysis-skeleton';
 
-export function GanAnalysis() {
-  const [fileDataUri, setFileDataUri] = useState<string | null>(null);
-  const [result, setResult] = useState<ClassifyGanFingerprintOutput | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
-  const { toast } = useToast();
+interface GanAnalysisProps {
+  fileDataUri: string | null;
+  result: ClassifyGanFingerprintOutput | null;
+  isLoading: boolean;
+  onFileSelect: (dataUri: string, file: File) => Promise<void>;
+  resetState: () => void;
+}
 
-  const onFileSelect = async (dataUri: string, file: File) => {
-    // For now, GAN analysis is most effective on images.
-    if (!file.type.startsWith('image/')) {
-        toast({
-            variant: 'destructive',
-            title: 'Unsupported File Type',
-            description: 'GAN Fingerprint analysis currently supports image files only.',
-        });
-        return;
-    }
 
-    setFileDataUri(dataUri);
-    setResult(null);
-    setIsLoading(true);
-
-    try {
-      const analysisResult = await handleGanFingerprintAnalysis(dataUri);
-      setResult(analysisResult);
-    } catch (error) {
-      toast({
-        variant: 'destructive',
-        title: 'Analysis Failed',
-        description: error instanceof Error ? error.message : 'An unknown error occurred.',
-      });
-      resetState();
-    } finally {
-      setIsLoading(false);
-    }
-  };
-  
-  const resetState = () => {
-    setFileDataUri(null);
-    setResult(null);
-    setIsLoading(false);
-  }
-
+export function GanAnalysis({ fileDataUri, result, isLoading, onFileSelect, resetState }: GanAnalysisProps) {
   return (
     <Card className="shadow-lg">
       <CardHeader>

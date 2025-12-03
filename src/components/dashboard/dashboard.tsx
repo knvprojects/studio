@@ -1,12 +1,125 @@
 "use client";
 
+import { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ImageAnalysis } from "@/components/dashboard/image-analysis";
 import { VideoAnalysis } from "@/components/dashboard/video-analysis";
 import { GanAnalysis } from "@/components/dashboard/gan-analysis";
 import { ImageIcon, VideoIcon, Fingerprint } from "lucide-react";
+import { handleImageAnalysis, handleVideoAnalysis, handleGanFingerprintAnalysis } from "@/lib/actions";
+import type { ImageAnalysisResult, VideoAnalysisResult, ClassifyGanFingerprintOutput } from "@/lib/types";
+import { useToast } from "@/hooks/use-toast";
+
+
+type ImageAnalysisState = {
+  fileDataUri: string | null;
+  result: ImageAnalysisResult | null;
+  isLoading: boolean;
+};
+
+type VideoAnalysisState = {
+  fileDataUri: string | null;
+  result: VideoAnalysisResult | null;
+  isLoading: boolean;
+};
+
+type GanAnalysisState = {
+  fileDataUri: string | null;
+  result: ClassifyGanFingerprintOutput | null;
+  isLoading: boolean;
+};
+
 
 export function Dashboard() {
+  const { toast } = useToast();
+
+  const [imageState, setImageState] = useState<ImageAnalysisState>({
+    fileDataUri: null,
+    result: null,
+    isLoading: false,
+  });
+
+  const [videoState, setVideoState] = useState<VideoAnalysisState>({
+    fileDataUri: null,
+    result: null,
+    isLoading: false,
+  });
+
+  const [ganState, setGanState] = useState<GanAnalysisState>({
+    fileDataUri: null,
+    result: null,
+    isLoading: false,
+  });
+
+
+  const onImageFileSelect = async (dataUri: string) => {
+    setImageState({ fileDataUri: dataUri, result: null, isLoading: true });
+    try {
+      const analysisResult = await handleImageAnalysis(dataUri);
+      setImageState((s) => ({ ...s, result: analysisResult, isLoading: false }));
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "Analysis Failed",
+        description: error instanceof Error ? error.message : "An unknown error occurred.",
+      });
+      resetImageState();
+    }
+  };
+  
+  const resetImageState = () => {
+    setImageState({ fileDataUri: null, result: null, isLoading: false });
+  }
+
+  const onVideoFileSelect = async (dataUri: string) => {
+    setVideoState({ fileDataUri: dataUri, result: null, isLoading: true });
+    try {
+      const analysisResult = await handleVideoAnalysis(dataUri);
+      setVideoState((s) => ({ ...s, result: analysisResult, isLoading: false }));
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "Analysis Failed",
+        description: error instanceof Error ? error.message : "An unknown error occurred.",
+      });
+      resetVideoState();
+    }
+  };
+  
+  const resetVideoState = () => {
+    setVideoState({ fileDataUri: null, result: null, isLoading: false });
+  }
+
+  const onGanFileSelect = async (dataUri: string, file: File) => {
+    if (!file.type.startsWith("image/")) {
+        toast({
+            variant: "destructive",
+            title: "Unsupported File Type",
+            description: "GAN Fingerprint analysis currently supports image files only.",
+        });
+        return;
+    }
+
+    setGanState({ fileDataUri: dataUri, result: null, isLoading: true });
+
+    try {
+      const analysisResult = await handleGanFingerprintAnalysis(dataUri);
+      setGanState((s) => ({...s, result: analysisResult, isLoading: false }));
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "Analysis Failed",
+        description: error instanceof Error ? error.message : "An unknown error occurred.",
+      });
+      resetGanState();
+    }
+  };
+  
+  const resetGanState = () => {
+    setGanState({ fileDataUri: null, result: null, isLoading: false });
+  }
+
+
   return (
     <Tabs defaultValue="image" className="w-full">
       <TabsList className="grid w-full grid-cols-3 mx-auto max-w-2xl">
@@ -24,13 +137,25 @@ export function Dashboard() {
         </TabsTrigger>
       </TabsList>
       <TabsContent value="image" className="mt-6">
-        <ImageAnalysis />
+        <ImageAnalysis 
+          onFileSelect={onImageFileSelect}
+          resetState={resetImageState}
+          {...imageState}
+        />
       </TabsContent>
       <TabsContent value="video" className="mt-6">
-        <VideoAnalysis />
+        <VideoAnalysis 
+          onFileSelect={onVideoFileSelect}
+          resetState={resetVideoState}
+          {...videoState}
+        />
       </TabsContent>
       <TabsContent value="gan" className="mt-6">
-        <GanAnalysis />
+        <GanAnalysis 
+          onFileSelect={onGanFileSelect}
+          resetState={resetGanState}
+          {...ganState}
+        />
       </TabsContent>
     </Tabs>
   );

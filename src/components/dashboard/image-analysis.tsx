@@ -1,49 +1,23 @@
 
 'use client';
 
-import { useState } from 'react';
 import Image from 'next/image';
-import { handleImageAnalysis } from '@/lib/actions';
 import type { ImageAnalysisResult } from '@/lib/types';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { FileUploader } from './file-uploader';
 import { AnalysisResultDisplay } from './analysis-result';
-import { useToast } from '@/hooks/use-toast';
 import { AnalysisSkeleton } from './analysis-skeleton';
 
-export function ImageAnalysis() {
-  const [fileDataUri, setFileDataUri] = useState<string | null>(null);
-  const [result, setResult] = useState<ImageAnalysisResult | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
-  const { toast } = useToast();
+interface ImageAnalysisProps {
+  fileDataUri: string | null;
+  result: ImageAnalysisResult | null;
+  isLoading: boolean;
+  onFileSelect: (dataUri: string, file: File) => Promise<void>;
+  resetState: () => void;
+}
 
-  const onFileSelect = async (dataUri: string) => {
-    setFileDataUri(dataUri);
-    setResult(null);
-    setIsLoading(true);
 
-    try {
-      const analysisResult = await handleImageAnalysis(dataUri);
-      setResult(analysisResult);
-    } catch (error) {
-      toast({
-        variant: 'destructive',
-        title: 'Analysis Failed',
-        description: error instanceof Error ? error.message : 'An unknown error occurred.',
-      });
-      // Reset on failure to allow retry
-      resetState();
-    } finally {
-      setIsLoading(false);
-    }
-  };
-  
-  const resetState = () => {
-    setFileDataUri(null);
-    setResult(null);
-    setIsLoading(false);
-  }
-
+export function ImageAnalysis({ fileDataUri, result, isLoading, onFileSelect, resetState }: ImageAnalysisProps) {
   return (
     <Card className="shadow-lg">
       <CardHeader>
