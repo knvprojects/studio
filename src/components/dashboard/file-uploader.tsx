@@ -97,7 +97,7 @@ export function FileUploader({ onFileSelect, accept, fileTypeDescription }: File
             <span className="font-semibold">Click to upload</span> or drag and drop
           </p>
           <p className="text-xs text-muted-foreground">
-            Your {fileTypeDescription} file
+            Your {fileTypeDescription} {fileTypeDescription !== 'file' && 'file'}
           </p>
         </div>
         <input id={`dropzone-file-${fileTypeDescription}`} type="file" className="hidden" accept={accept} onChange={handleFileChange} />
