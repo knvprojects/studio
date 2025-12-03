@@ -68,7 +68,7 @@ Based on your analysis, provide:
 1.  A probability (0-1) that the image is AI-generated.
 2.  Set isAiGenerated to true if the probability is above 0.5.
 3.  A detailed explanation of any anomalies detected (e.g., unusual textures, lighting inconsistencies, anatomical errors).
-4.  A list of scores for the following forensic indicators: 'GAN Fingerprints', 'Model Artifacts', 'Texture Analysis', and 'Frequency Spectrum'. Each score should be a number between 0 and 1, where a higher score indicates a higher likelihood of AI generation for that specific indicator. These scores should correlate with your overall probability.
+4.  A list of scores for the following forensic indicators: 'GAN Fingerprints', 'CNN/ViT Models', 'Texture Analysis', 'Frequency Spectrum', 'Lighting Inconsistencies', 'Anatomical Errors'. Each score should be a number between 0 and 1, where a higher score indicates a higher likelihood of AI generation for that specific indicator. These scores should correlate with your overall probability.
 
 Return the probability, isAiGenerated flag, a detailed anomaly explanation, and the forensic indicator scores.`,
 });
