@@ -51,9 +51,8 @@ export function ImageAnalysis() {
         <CardDescription>Upload an image to check for signs of AI generation, including GAN fingerprints and other artifacts.</CardDescription>
       </CardHeader>
       <CardContent>
-        <div className="grid grid-cols-1 gap-8">
-          <div className="flex flex-col gap-4">
-            <h3 className="font-semibold text-lg border-b pb-2">Your Image</h3>
+        <div className="flex flex-col gap-8">
+          <div className="w-full max-w-lg mx-auto flex flex-col gap-4">
             {!fileDataUri && !isLoading && <FileUploader onFileSelect={onFileSelect} accept="image/*" fileTypeDescription="image" />}
             {(fileDataUri || isLoading) && (
               <div className="relative aspect-video w-full overflow-hidden rounded-lg border bg-muted">
@@ -63,7 +62,7 @@ export function ImageAnalysis() {
           </div>
           {(isLoading || result) && (
             <div className="flex flex-col gap-4">
-              <h3 className="font-semibold text-lg border-b pb-2">Analysis Report</h3>
+              <h3 className="font-semibold text-lg border-b pb-2 mb-4">Analysis Report</h3>
               {isLoading && <AnalysisSkeleton />}
               {result && fileDataUri && <AnalysisResultDisplay image={fileDataUri} result={result} onReset={resetState} />}
               {!isLoading && !result && (

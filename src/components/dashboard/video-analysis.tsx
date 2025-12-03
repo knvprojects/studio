@@ -50,9 +50,8 @@ export function VideoAnalysis() {
         <CardDescription>Upload a video to detect deepfake indicators like unnatural blinking, pose mismatch, and lip-sync issues.</CardDescription>
       </CardHeader>
       <CardContent>
-        <div className="grid grid-cols-1 gap-8">
-          <div className="flex flex-col gap-4">
-            <h3 className="font-semibold text-lg border-b pb-2">Your Video</h3>
+        <div className="flex flex-col gap-8">
+          <div className="w-full max-w-lg mx-auto flex flex-col gap-4">
             {!fileDataUri && !isLoading && <FileUploader onFileSelect={onFileSelect} accept="video/*" fileTypeDescription="video" />}
             {(fileDataUri || isLoading) && (
               <div className="relative aspect-video w-full overflow-hidden rounded-lg border bg-black">
@@ -62,7 +61,7 @@ export function VideoAnalysis() {
           </div>
           {(isLoading || result) && (
             <div className="flex flex-col gap-4">
-              <h3 className="font-semibold text-lg border-b pb-2">Analysis Report</h3>
+              <h3 className="font-semibold text-lg border-b pb-2 mb-4">Analysis Report</h3>
               {isLoading && <AnalysisSkeleton />}
               {result && fileDataUri && <AnalysisResultDisplay video={fileDataUri} result={result} onReset={resetState} />}
               {!isLoading && !result && (
