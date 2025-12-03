@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useCallback, type ChangeEvent, type DragEvent } from 'react';
@@ -18,11 +19,19 @@ export function FileUploader({ onFileSelect, accept, fileTypeDescription }: File
   const handleFile = useCallback(
     (file: File) => {
       if (file) {
-        if (!file.type.startsWith(accept.replace('/*', ''))) {
+        const acceptedTypes = accept.split(',').map(t => t.trim());
+        const isAccepted = acceptedTypes.some(type => {
+          if (type.endsWith('/*')) {
+            return file.type.startsWith(type.slice(0, -1));
+          }
+          return file.type === type;
+        });
+        
+        if (!isAccepted) {
           toast({
             variant: 'destructive',
             title: 'Invalid file type',
-            description: `Please upload a ${fileTypeDescription} file.`,
+            description: `Please upload a valid ${fileTypeDescription}.`,
           });
           return;
         }
@@ -82,7 +91,7 @@ export function FileUploader({ onFileSelect, accept, fileTypeDescription }: File
   return (
     <div className="flex items-center justify-center w-full">
       <label
-        htmlFor={`dropzone-file-${fileTypeDescription}`}
+        htmlFor={`dropzone-file-${fileTypeDescription.replace(/\s/g, '-')}`}
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
         onDrop={handleDrop}
@@ -97,10 +106,10 @@ export function FileUploader({ onFileSelect, accept, fileTypeDescription }: File
             <span className="font-semibold">Click to upload</span> or drag and drop
           </p>
           <p className="text-xs text-muted-foreground">
-            Your {fileTypeDescription} {fileTypeDescription !== 'file' && 'file'}
+            Upload a {fileTypeDescription}
           </p>
         </div>
-        <input id={`dropzone-file-${fileTypeDescription}`} type="file" className="hidden" accept={accept} onChange={handleFileChange} />
+        <input id={`dropzone-file-${fileTypeDescription.replace(/\s/g, '-')}`} type="file" className="hidden" accept={accept} onChange={handleFileChange} />
       </label>
     </div>
   );

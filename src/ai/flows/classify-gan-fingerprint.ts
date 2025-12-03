@@ -1,3 +1,4 @@
+
 // This is an AI-powered tool to classify the GAN fingerprint of AI-generated images.
 
 'use server';

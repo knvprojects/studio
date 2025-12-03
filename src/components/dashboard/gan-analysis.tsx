@@ -31,7 +31,7 @@ export function GanAnalysis({ fileDataUri, result, isLoading, onFileSelect, rese
       case 'video':
         return <video src={fileDataUri} controls className="h-full w-full" />;
       case 'audio':
-        return <audio src={fileDataUri} controls className="h-full w-full" />;
+        return <audio src={fileDataUri} controls className="w-full" />;
       default:
         return <p className="text-center text-muted-foreground">Unsupported file type for preview.</p>;
     }
@@ -52,7 +52,7 @@ export function GanAnalysis({ fileDataUri, result, isLoading, onFileSelect, rese
       </CardHeader>
       <CardContent className="space-y-8">
         {!fileDataUri && !isLoading ? (
-            <FileUploader onFileSelect={onFileSelect} accept="*/*" fileTypeDescription="file" />
+            <FileUploader onFileSelect={onFileSelect} accept="image/*,video/*,audio/*" fileTypeDescription="media file" />
         ) : isLoading ? (
             <div className="space-y-8">
                 <div className="relative aspect-video w-full max-w-md mx-auto overflow-hidden rounded-lg border bg-muted">
