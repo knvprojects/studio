@@ -31,7 +31,7 @@ export const PrintReport = ({ image, video, result }: PrintReportProps) => {
     }, []);
 
     return (
-        <div className="hidden print:block p-8 font-body">
+        <div className="print-only-styles">
             <header className="flex items-center gap-3 mb-10 border-b pb-4">
                 <ShieldCheck className="h-8 w-8 text-primary" />
                 <h1 className="text-3xl font-bold font-headline">DeepFake Defender Report</h1>

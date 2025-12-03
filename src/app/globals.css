@@ -40,3 +40,32 @@
     @apply bg-background text-foreground;
   }
 }
+
+@layer utilities {
+  .print-only-styles {
+    display: none;
+  }
+
+  @media print {
+    body * {
+      visibility: hidden;
+    }
+    .print-styles, .print-styles * {
+      visibility: visible;
+    }
+    .print-styles {
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 100%;
+    }
+    .print-only-styles {
+      display: block;
+      visibility: visible;
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 100%;
+    }
+  }
+}

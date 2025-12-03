@@ -1,3 +1,4 @@
+
 'use client';
 
 import type { ImageAnalysisResult, VideoAnalysisResult } from '@/lib/types';
@@ -31,7 +32,7 @@ export function AnalysisResultDisplay({ result, onReset, image, video }: Analysi
 
   return (
     <>
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 print:hidden">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 print-styles">
         {/* Left Column: Overview */}
         <Card className="md:col-span-1 flex flex-col">
            <CardHeader>
