@@ -23,6 +23,7 @@ export const PrintReport = ({ image, video, result }: PrintReportProps) => {
     const [dateTime, setDateTime] = useState({ date: '', time: ''});
 
     useEffect(() => {
+        // This will only run on the client, after hydration
         const now = new Date();
         setDateTime({
             date: now.toLocaleDateString(),
@@ -30,8 +31,12 @@ export const PrintReport = ({ image, video, result }: PrintReportProps) => {
         });
     }, []);
 
+    if (!dateTime.date) {
+        return null; // Don't render on the server or before hydration
+    }
+
     return (
-        <div className="print-only-styles">
+        <div className="print-only">
             <header className="flex items-center gap-3 mb-10 border-b pb-4">
                 <ShieldCheck className="h-8 w-8 text-primary" />
                 <h1 className="text-3xl font-bold font-headline">DeepFake Defender Report</h1>

@@ -32,7 +32,7 @@ export function AnalysisResultDisplay({ result, onReset, image, video }: Analysi
 
   return (
     <>
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 print-styles">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {/* Left Column: Overview */}
         <Card className="md:col-span-1 flex flex-col">
            <CardHeader>
@@ -125,7 +125,9 @@ export function AnalysisResultDisplay({ result, onReset, image, video }: Analysi
           )}
         </div>
       </div>
-      <PrintReport image={image} video={video} result={result} />
+      <div className="printable">
+        <PrintReport image={image} video={video} result={result} />
+      </div>
     </>
   );
 }

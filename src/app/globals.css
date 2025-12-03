@@ -42,7 +42,7 @@
 }
 
 @layer utilities {
-  .print-only-styles {
+  .print-only {
     display: none;
   }
 
@@ -50,22 +50,18 @@
     body * {
       visibility: hidden;
     }
-    .print-styles, .print-styles * {
+    .printable, .printable * {
       visibility: visible;
     }
-    .print-styles {
+    .printable {
       position: absolute;
       left: 0;
       top: 0;
       width: 100%;
     }
-    .print-only-styles {
+    .print-only {
       display: block;
       visibility: visible;
-      position: absolute;
-      left: 0;
-      top: 0;
-      width: 100%;
     }
   }
 }
