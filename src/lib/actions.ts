@@ -3,7 +3,8 @@
 import { analyzeUploadedImage } from "@/ai/flows/analyze-uploaded-image";
 import { classifyGanFingerprint } from "@/ai/flows/classify-gan-fingerprint";
 import { processVideoForDeepfakes } from "@/ai/flows/process-video-for-deepfakes";
-import type { ImageAnalysisResult, VideoAnalysisResult, ClassifyGanFingerprintOutput } from "@/lib/types";
+import { analyzeAudio } from "@/ai/flows/analyze-audio";
+import type { ImageAnalysisResult, VideoAnalysisResult, ClassifyGanFingerprintOutput, AudioAnalysisResult } from "@/lib/types";
 
 export async function handleImageAnalysis(
   imageDataUri: string
@@ -12,7 +13,6 @@ export async function handleImageAnalysis(
     const analysis = await analyzeUploadedImage({ photoDataUri: imageDataUri });
     return {
       ...analysis,
-      ganClassification: null, // GAN classification is now separate
     };
   } catch (error) {
     console.error("Image analysis failed:", error);
@@ -31,6 +31,19 @@ export async function handleVideoAnalysis(
     console.error("Video analysis failed:", error);
     // Propagate a user-friendly error message
     throw new Error("Failed to analyze the video. The model may be unavailable. Please try again later.");
+  }
+}
+
+export async function handleAudioAnalysis(
+  audioDataUri: string
+): Promise<AudioAnalysisResult> {
+  try {
+    const analysis = await analyzeAudio({ audioDataUri });
+    return analysis;
+  } catch (error) {
+    console.error("Audio analysis failed:", error);
+    // Propagate a user-friendly error message
+    throw new Error("Failed to analyze the audio. The model may be unavailable. Please try again later.");
   }
 }
 

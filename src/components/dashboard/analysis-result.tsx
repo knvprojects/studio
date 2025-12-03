@@ -1,14 +1,14 @@
 
 'use client';
 
-import type { ImageAnalysisResult, VideoAnalysisResult } from '@/lib/types';
+import type { ImageAnalysisResult, VideoAnalysisResult, AudioAnalysisResult } from '@/lib/types';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { AlertTriangle, BarChart3, Fingerprint, RefreshCcw, FileText } from 'lucide-react';
 import { Progress } from '@/components/ui/progress';
 
 interface AnalysisResultDisplayProps {
-  result: ImageAnalysisResult | VideoAnalysisResult;
+  result: ImageAnalysisResult | VideoAnalysisResult | AudioAnalysisResult;
   onReset: () => void;
 }
 
@@ -16,8 +16,13 @@ function isImageResult(result: any): result is ImageAnalysisResult {
   return 'isAiGenerated' in result;
 }
 
+function isAudioResult(result: any): result is AudioAnalysisResult {
+  return 'analysisProbability' in result;
+}
+
+
 export function AnalysisResultDisplay({ result, onReset }: AnalysisResultDisplayProps) {
-  const probability = isImageResult(result) ? result.probability : result.deepfakeProbability;
+  const probability = isImageResult(result) ? result.probability : isAudioResult(result) ? result.analysisProbability : result.deepfakeProbability;
   const anomalies = isImageResult(result) ? result.anomalies : result.anomalyExplanation;
   const forensicIndicators = result.forensicIndicators || [];
   const isAI = probability > 0.5;
@@ -60,7 +65,7 @@ export function AnalysisResultDisplay({ result, onReset }: AnalysisResultDisplay
             </CardDescription>
           </CardContent>
           <CardFooter className="flex-col gap-2 pt-4">
-            <Button onClick={onReset} className="w-full">
+             <Button onClick={onReset} className="w-full">
               <RefreshCcw className="mr-2 h-4 w-4" /> Analyze Another
             </Button>
           </CardFooter>
@@ -100,19 +105,6 @@ export function AnalysisResultDisplay({ result, onReset }: AnalysisResultDisplay
             </CardContent>
           </Card>
 
-          {isImageResult(result) && result.ganClassification && (
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2"><Fingerprint className="h-5 w-5" />GAN Fingerprint</CardTitle>
-                <CardDescription>Identified source model if applicable.</CardDescription>
-              </CardHeader>
-              <CardContent className="text-sm space-y-2">
-                  <p><strong>Source Model:</strong> {result.ganClassification.sourceModel || 'Unknown'}</p>
-                  <p><strong>Confidence:</strong> {Math.round((result.ganClassification.confidence || 0) * 100)}%</p>
-                  {result.ganClassification.details && <p className="text-muted-foreground text-xs"><strong>Details:</strong> {result.ganClassification.details}</p>}
-              </CardContent>
-            </Card>
-          )}
         </div>
       </div>
     </>

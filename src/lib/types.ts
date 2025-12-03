@@ -1,6 +1,7 @@
 import type { AnalyzeUploadedImageOutput } from "@/ai/flows/analyze-uploaded-image";
 import type { ClassifyGanFingerprintOutput as GanOutput } from "@/ai/flows/classify-gan-fingerprint";
 import type { ProcessVideoForDeepfakesOutput } from "@/ai/flows/process-video-for-deepfakes";
+import type { AnalyzeAudioOutput } from "@/ai/flows/analyze-audio";
 
 type ForensicIndicator = {
   name: string;
@@ -8,11 +9,14 @@ type ForensicIndicator = {
 };
 
 export type ImageAnalysisResult = AnalyzeUploadedImageOutput & {
-  ganClassification: GanOutput | null;
   forensicIndicators: ForensicIndicator[];
 };
 
 export type VideoAnalysisResult = ProcessVideoForDeepfakesOutput & {
+  forensicIndicators: ForensicIndicator[];
+};
+
+export type AudioAnalysisResult = AnalyzeAudioOutput & {
   forensicIndicators: ForensicIndicator[];
 };
 

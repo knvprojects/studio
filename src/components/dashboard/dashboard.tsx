@@ -4,10 +4,11 @@ import { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ImageAnalysis } from "@/components/dashboard/image-analysis";
 import { VideoAnalysis } from "@/components/dashboard/video-analysis";
+import { AudioAnalysis } from "@/components/dashboard/audio-analysis";
 import { GanAnalysis } from "@/components/dashboard/gan-analysis";
-import { ImageIcon, VideoIcon, Fingerprint } from "lucide-react";
-import { handleImageAnalysis, handleVideoAnalysis, handleGanFingerprintAnalysis } from "@/lib/actions";
-import type { ImageAnalysisResult, VideoAnalysisResult, ClassifyGanFingerprintOutput } from "@/lib/types";
+import { ImageIcon, VideoIcon, Fingerprint, Mic } from "lucide-react";
+import { handleImageAnalysis, handleVideoAnalysis, handleGanFingerprintAnalysis, handleAudioAnalysis } from "@/lib/actions";
+import type { ImageAnalysisResult, VideoAnalysisResult, ClassifyGanFingerprintOutput, AudioAnalysisResult } from "@/lib/types";
 import { useToast } from "@/hooks/use-toast";
 
 
@@ -20,6 +21,12 @@ type ImageAnalysisState = {
 type VideoAnalysisState = {
   fileDataUri: string | null;
   result: VideoAnalysisResult | null;
+  isLoading: boolean;
+};
+
+type AudioAnalysisState = {
+  fileDataUri: string | null;
+  result: AudioAnalysisResult | null;
   isLoading: boolean;
 };
 
@@ -40,6 +47,12 @@ export function Dashboard() {
   });
 
   const [videoState, setVideoState] = useState<VideoAnalysisState>({
+    fileDataUri: null,
+    result: null,
+    isLoading: false,
+  });
+
+  const [audioState, setAudioState] = useState<AudioAnalysisState>({
     fileDataUri: null,
     result: null,
     isLoading: false,
@@ -90,6 +103,26 @@ export function Dashboard() {
     setVideoState({ fileDataUri: null, result: null, isLoading: false });
   }
 
+  const onAudioFileSelect = async (dataUri: string) => {
+    setAudioState({ fileDataUri: dataUri, result: null, isLoading: true });
+    try {
+      const analysisResult = await handleAudioAnalysis(dataUri);
+      setAudioState((s) => ({ ...s, result: analysisResult, isLoading: false }));
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "Analysis Failed",
+        description: error instanceof Error ? error.message : "An unknown error occurred.",
+      });
+      resetAudioState();
+    }
+  };
+
+  const resetAudioState = () => {
+    setAudioState({ fileDataUri: null, result: null, isLoading: false });
+  };
+
+
   const onGanFileSelect = async (dataUri: string, file: File) => {
     if (!file.type.startsWith("image/")) {
         toast({
@@ -122,7 +155,7 @@ export function Dashboard() {
 
   return (
     <Tabs defaultValue="image" className="w-full">
-      <TabsList className="grid w-full grid-cols-3 mx-auto max-w-2xl">
+      <TabsList className="grid w-full grid-cols-4 mx-auto max-w-3xl">
         <TabsTrigger value="image">
           <ImageIcon className="mr-2 h-4 w-4" />
           Image Analysis
@@ -130,6 +163,10 @@ export function Dashboard() {
         <TabsTrigger value="video">
           <VideoIcon className="mr-2 h-4 w-4" />
           Video Analysis
+        </TabsTrigger>
+        <TabsTrigger value="audio">
+          <Mic className="mr-2 h-4 w-4" />
+          Audio Analysis
         </TabsTrigger>
         <TabsTrigger value="gan">
           <Fingerprint className="mr-2 h-4 w-4" />
@@ -148,6 +185,13 @@ export function Dashboard() {
           onFileSelect={onVideoFileSelect}
           resetState={resetVideoState}
           {...videoState}
+        />
+      </TabsContent>
+      <TabsContent value="audio" className="mt-6">
+        <AudioAnalysis 
+          onFileSelect={onAudioFileSelect}
+          resetState={resetAudioState}
+          {...audioState}
         />
       </TabsContent>
       <TabsContent value="gan" className="mt-6">
