@@ -16,27 +16,27 @@ function isImageResult(result: any): result is ImageAnalysisResult {
 
 export const PrintReport = ({ image, video, result }: PrintReportProps) => {
     const probability = isImageResult(result) ? result.probability : result.deepfakeProbability;
-    const anomalies = isImageResult(result) ? result.anomalies : result.anomalyExplanation;
+    const anomalies = isImagerReult(result) ? result.anomalies : result.anomalyExplanation;
     const isAI = probability > 0.5;
     const percentage = Math.round(probability * 100);
 
     const [dateTime, setDateTime] = useState({ date: '', time: ''});
 
     useEffect(() => {
-        // This will only run on the client, after hydration
         const now = new Date();
         setDateTime({
             date: now.toLocaleDateString(),
             time: now.toLocaleTimeString()
         });
     }, []);
-
+    
+    // Don't render on server or before hydration
     if (!dateTime.date) {
-        return null; // Don't render on the server or before hydration
+        return null;
     }
 
     return (
-        <div className="print-only">
+        <div className="printable p-8">
             <header className="flex items-center gap-3 mb-10 border-b pb-4">
                 <ShieldCheck className="h-8 w-8 text-primary" />
                 <h1 className="text-3xl font-bold font-headline">DeepFake Defender Report</h1>
@@ -82,3 +82,31 @@ export const PrintReport = ({ image, video, result }: PrintReportProps) => {
         </div>
     );
 };
+
+// This is a global wrapper to solve printing issues.
+// We'll use a global event bus to send the data to be printed.
+export const PrintReportWrapper = () => {
+    const [printData, setPrintData] = useState<PrintReportProps | null>(null);
+
+    useEffect(() => {
+        const handlePrint = (event: CustomEvent<PrintReportProps>) => {
+            setPrintData(event.detail);
+            setTimeout(() => {
+                window.print();
+                setPrintData(null);
+            }, 100);
+        };
+
+        window.addEventListener('print-report', handlePrint as EventListener);
+
+        return () => {
+            window.removeEventListener('print-report', handlePrint as EventListener);
+        }
+    }, []);
+    
+    if (!printData) {
+        return null;
+    }
+
+    return <PrintReport {...printData} />;
+}

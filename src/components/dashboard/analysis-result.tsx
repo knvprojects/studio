@@ -125,7 +125,7 @@ export function AnalysisResultDisplay({ result, onReset, image, video }: Analysi
           )}
         </div>
       </div>
-      <div className="printable">
+      <div className="hidden">
         <PrintReport image={image} video={video} result={result} />
       </div>
     </>

@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import './globals.css';
 import { Toaster } from '@/components/ui/toaster';
+import { PrintReportWrapper } from '@/components/dashboard/print-report';
 
 export const metadata: Metadata = {
   title: 'DeepFake Defender',
@@ -25,6 +26,7 @@ export default function RootLayout({
       <body className="font-body antialiased">
         {children}
         <Toaster />
+        <PrintReportWrapper />
       </body>
     </html>
   );
