@@ -49,13 +49,17 @@ const analyzeAudioPrompt = ai.definePrompt({
   name: 'analyzeAudioPrompt',
   input: {schema: AnalyzeAudioInputSchema},
   output: {schema: AnalyzeAudioOutputSchema},
-  prompt: `Analyze the following audio for AI generation indicators.
+  prompt: `You are an expert audio forensic analyst. Your task is to analyze an audio file and determine if it contains AI-generated or AI-synthesized voice or sounds.
+
+**Crucially, you must distinguish between common music production techniques (like autotune, reverb, vocoders, and layered tracks) and actual AI synthesis.** The presence of autotune on a human voice or complex background music does **not** automatically indicate AI generation.
+
+Analyze the following audio:
 
 Audio: {{media url=audioDataUri}}
 
 Based on your analysis, provide:
-1.  A probability score (0-1) indicating the likelihood that the audio is AI-generated.
-2.  A detailed explanation of detected anomalies.
+1.  A probability score (0-1) indicating the likelihood that the audio contains AI-generated content. This score should specifically reflect the presence of synthetic elements, not just audio effects.
+2.  A detailed explanation of detected anomalies. If you detect autotune or other effects, mention them but clarify that they are not definitive proof of AI generation.
 3.  A list of scores for the following forensic indicators: 'Spectrogram Anomalies', 'Codec Fingerprints', 'Synthetic Voice Markers', 'Background Noise Inconsistencies', 'Phase Discontinuities'. Each score should be a number between 0 and 1, where a higher score indicates a higher likelihood of that indicator being present. These scores should correlate with your overall probability.
 
 Return the probability, a detailed anomaly explanation, and the forensic indicator scores.`,
