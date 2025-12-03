@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState } from 'react';
@@ -50,7 +51,7 @@ export function ImageAnalysis() {
         <CardDescription>Upload an image to check for signs of AI generation, including GAN fingerprints and other artifacts.</CardDescription>
       </CardHeader>
       <CardContent>
-        <div className="grid md:grid-cols-2 gap-8">
+        <div className="grid grid-cols-1 gap-8">
           <div className="flex flex-col gap-4">
             <h3 className="font-semibold text-lg border-b pb-2">Your Image</h3>
             {!fileDataUri && !isLoading && <FileUploader onFileSelect={onFileSelect} accept="image/*" fileTypeDescription="image" />}
@@ -60,16 +61,18 @@ export function ImageAnalysis() {
               </div>
             )}
           </div>
-          <div className="flex flex-col gap-4">
-            <h3 className="font-semibold text-lg border-b pb-2">Analysis Report</h3>
-            {isLoading && <AnalysisSkeleton />}
-            {result && fileDataUri && <AnalysisResultDisplay image={fileDataUri} result={result} onReset={resetState} />}
-            {!isLoading && !result && (
-              <div className="flex flex-col items-center justify-center h-full text-center p-8 border border-dashed rounded-lg bg-card text-muted-foreground">
-                  <p>Upload an image to see the analysis results.</p>
-              </div>
-            )}
-          </div>
+          {(isLoading || result) && (
+            <div className="flex flex-col gap-4">
+              <h3 className="font-semibold text-lg border-b pb-2">Analysis Report</h3>
+              {isLoading && <AnalysisSkeleton />}
+              {result && fileDataUri && <AnalysisResultDisplay image={fileDataUri} result={result} onReset={resetState} />}
+              {!isLoading && !result && (
+                <div className="flex flex-col items-center justify-center h-full text-center p-8 border border-dashed rounded-lg bg-card text-muted-foreground">
+                    <p>Upload an image to see the analysis results.</p>
+                </div>
+              )}
+            </div>
+          )}
         </div>
       </CardContent>
     </Card>

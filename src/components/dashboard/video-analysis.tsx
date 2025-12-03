@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState } from 'react';
@@ -39,7 +40,7 @@ export function VideoAnalysis() {
   const resetState = () => {
     setFileDataUri(null);
     setResult(null);
-setIsLoading(false);
+    setIsLoading(false);
   }
 
   return (
@@ -49,7 +50,7 @@ setIsLoading(false);
         <CardDescription>Upload a video to detect deepfake indicators like unnatural blinking, pose mismatch, and lip-sync issues.</CardDescription>
       </CardHeader>
       <CardContent>
-        <div className="grid md:grid-cols-2 gap-8">
+        <div className="grid grid-cols-1 gap-8">
           <div className="flex flex-col gap-4">
             <h3 className="font-semibold text-lg border-b pb-2">Your Video</h3>
             {!fileDataUri && !isLoading && <FileUploader onFileSelect={onFileSelect} accept="video/*" fileTypeDescription="video" />}
@@ -59,16 +60,18 @@ setIsLoading(false);
               </div>
             )}
           </div>
-          <div className="flex flex-col gap-4">
-            <h3 className="font-semibold text-lg border-b pb-2">Analysis Report</h3>
-            {isLoading && <AnalysisSkeleton />}
-            {result && fileDataUri && <AnalysisResultDisplay video={fileDataUri} result={result} onReset={resetState} />}
-            {!isLoading && !result && (
-              <div className="flex flex-col items-center justify-center h-full text-center p-8 border border-dashed rounded-lg bg-card text-muted-foreground">
-                  <p>Upload a video to see the analysis results.</p>
-              </div>
-            )}
-          </div>
+          {(isLoading || result) && (
+            <div className="flex flex-col gap-4">
+              <h3 className="font-semibold text-lg border-b pb-2">Analysis Report</h3>
+              {isLoading && <AnalysisSkeleton />}
+              {result && fileDataUri && <AnalysisResultDisplay video={fileDataUri} result={result} onReset={resetState} />}
+              {!isLoading && !result && (
+                <div className="flex flex-col items-center justify-center h-full text-center p-8 border border-dashed rounded-lg bg-card text-muted-foreground">
+                    <p>Upload a video to see the analysis results.</p>
+                </div>
+              )}
+            </div>
+          )}
         </div>
       </CardContent>
     </Card>
