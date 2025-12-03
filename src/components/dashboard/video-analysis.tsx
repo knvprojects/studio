@@ -55,7 +55,7 @@ export function VideoAnalysis({ fileDataUri, result, isLoading, onFileSelect, re
                 </div>
                 <div className="flex flex-col gap-4">
                     <h3 className="font-semibold text-lg border-b pb-2">Analysis Report</h3>
-                    <AnalysisResultDisplay video={fileDataUri} result={result} onReset={resetState} />
+                    <AnalysisResultDisplay result={result} onReset={resetState} />
                 </div>
           </div>
         )}

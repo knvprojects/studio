@@ -4,12 +4,10 @@
 import type { ImageAnalysisResult, VideoAnalysisResult } from '@/lib/types';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { AlertTriangle, BarChart3, Fingerprint, RefreshCcw, Printer, FileText } from 'lucide-react';
+import { AlertTriangle, BarChart3, Fingerprint, RefreshCcw, FileText } from 'lucide-react';
 import { Progress } from '@/components/ui/progress';
 
 interface AnalysisResultDisplayProps {
-  image?: string;
-  video?: string;
   result: ImageAnalysisResult | VideoAnalysisResult;
   onReset: () => void;
 }
@@ -18,17 +16,12 @@ function isImageResult(result: any): result is ImageAnalysisResult {
   return 'isAiGenerated' in result;
 }
 
-export function AnalysisResultDisplay({ result, onReset, image, video }: AnalysisResultDisplayProps) {
+export function AnalysisResultDisplay({ result, onReset }: AnalysisResultDisplayProps) {
   const probability = isImageResult(result) ? result.probability : result.deepfakeProbability;
   const anomalies = isImageResult(result) ? result.anomalies : result.anomalyExplanation;
   const forensicIndicators = result.forensicIndicators || [];
   const isAI = probability > 0.5;
   const percentage = Math.round(probability * 100);
-
-  const handlePrint = () => {
-    const event = new CustomEvent('print-report', { detail: { image, video, result } });
-    window.dispatchEvent(event);
-  };
 
   return (
     <>
@@ -67,9 +60,6 @@ export function AnalysisResultDisplay({ result, onReset, image, video }: Analysi
             </CardDescription>
           </CardContent>
           <CardFooter className="flex-col gap-2 pt-4">
-             <Button onClick={handlePrint} className="w-full" variant="outline">
-              <Printer className="mr-2 h-4 w-4" /> Generate Report
-            </Button>
             <Button onClick={onReset} className="w-full">
               <RefreshCcw className="mr-2 h-4 w-4" /> Analyze Another
             </Button>
