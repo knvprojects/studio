@@ -5,11 +5,12 @@ import { useState } from 'react';
 import Image from 'next/image';
 import { handleGanFingerprintAnalysis } from '@/lib/actions';
 import type { ClassifyGanFingerprintOutput } from '@/lib/types';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { FileUploader } from './file-uploader';
 import { useToast } from '@/hooks/use-toast';
 import { Fingerprint, RefreshCcw } from 'lucide-react';
 import { Button } from '../ui/button';
+import { AnalysisSkeleton } from './analysis-skeleton';
 
 export function GanAnalysis() {
   const [fileDataUri, setFileDataUri] = useState<string | null>(null);
@@ -59,22 +60,23 @@ export function GanAnalysis() {
         <CardTitle>GAN Fingerprint Analysis</CardTitle>
         <CardDescription>Upload an AI-generated image to identify the source model (e.g., DALL·E, Stable Diffusion) by analyzing its unique GAN fingerprint.</CardDescription>
       </CardHeader>
-      <CardContent>
-        <div className="grid md:grid-cols-2 gap-8">
-            <div className="flex flex-col gap-4">
-              <h3 className="font-semibold text-lg border-b pb-2">Upload Media</h3>
-              {!fileDataUri && !isLoading && <FileUploader onFileSelect={onFileSelect} accept="image/*" fileTypeDescription="image" />}
-              
-              {(fileDataUri || isLoading) && (
-                <div className="relative aspect-video w-full overflow-hidden rounded-lg border bg-muted max-w-lg mx-auto">
-                  {fileDataUri ? <Image src={fileDataUri} alt="Uploaded image" fill objectFit="contain" /> : <div className="w-full h-full bg-muted animate-pulse"></div>}
-                </div>
-              )}
-          </div>
-          <div className="flex flex-col gap-4">
+      <CardContent className="space-y-8">
+        <div className="flex flex-col items-center gap-4">
+          <h3 className="w-full text-lg font-semibold border-b pb-2">Upload Media</h3>
+          {!fileDataUri && !isLoading && <FileUploader onFileSelect={onFileSelect} accept="image/*" fileTypeDescription="image" />}
+          
+          {(fileDataUri || isLoading) && (
+            <div className="relative aspect-video w-full max-w-md overflow-hidden rounded-lg border bg-muted">
+                {fileDataUri ? <Image src={fileDataUri} alt="Uploaded image" fill objectFit="contain" /> : <div className="w-full h-full bg-muted animate-pulse"></div>}
+            </div>
+          )}
+        </div>
+
+        {(isLoading || result) && (
+           <div className="flex flex-col gap-4">
               <h3 className="font-semibold text-lg border-b pb-2">Fingerprint Report</h3>
               {isLoading && (
-                 <div className="flex items-center justify-center h-full">
+                 <div className="flex items-center justify-center h-48">
                     <div className="animate-spin text-primary"><Fingerprint className="w-16 h-16"/></div>
                  </div>
               )}
@@ -84,16 +86,16 @@ export function GanAnalysis() {
                         <CardTitle className="flex items-center gap-2"><Fingerprint className="h-5 w-5" />GAN Fingerprint</CardTitle>
                         <CardDescription>Identified source model if applicable.</CardDescription>
                     </CardHeader>
-                    <CardContent className="space-y-4">
-                        <div className="text-center py-4">
+                    <CardContent className="grid sm:grid-cols-2 gap-6 items-center">
+                        <div className="text-center py-4 rounded-lg bg-muted">
                             <p className="text-sm text-muted-foreground">Source Model</p>
                             <p className="text-3xl font-bold">{result.sourceModel || 'Unknown'}</p>
                         </div>
-                        <div className="text-center py-4">
+                        <div className="text-center py-4 rounded-lg bg-muted">
                             <p className="text-sm text-muted-foreground">Confidence</p>
                             <p className="text-3xl font-bold">{Math.round((result.confidence || 0) * 100)}%</p>
                         </div>
-                        {result.details && <p className="text-muted-foreground text-sm pt-4 border-t"><strong>Details:</strong> {result.details}</p>}
+                        {result.details && <p className="sm:col-span-2 text-muted-foreground text-sm pt-4 border-t"><strong>Details:</strong> {result.details}</p>}
                     </CardContent>
                     <CardFooter>
                         <Button onClick={resetState} className="w-full">
@@ -102,13 +104,14 @@ export function GanAnalysis() {
                     </CardFooter>
                  </Card>
               )}
-              {!isLoading && !result && (
-                <div className="flex flex-col items-center justify-center h-full text-center p-8 border border-dashed rounded-lg bg-card text-muted-foreground">
-                    <p>Upload an image to see the GAN fingerprint analysis.</p>
-                </div>
-              )}
           </div>
-        </div>
+        )}
+        
+        {!isLoading && !result && !fileDataUri && (
+          <div className="flex flex-col items-center justify-center h-full text-center p-8 border border-dashed rounded-lg bg-card text-muted-foreground">
+              <p>Upload an image to see the GAN fingerprint analysis.</p>
+          </div>
+        )}
       </CardContent>
     </Card>
   );
