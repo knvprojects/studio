@@ -16,7 +16,7 @@ function isImageResult(result: any): result is ImageAnalysisResult {
 
 export const PrintReport = ({ image, video, result }: PrintReportProps) => {
     const probability = isImageResult(result) ? result.probability : result.deepfakeProbability;
-    const anomalies = isImagerReult(result) ? result.anomalies : result.anomalyExplanation;
+    const anomalies = isImageResult(result) ? result.anomalies : result.anomalyExplanation;
     const isAI = probability > 0.5;
     const percentage = Math.round(probability * 100);
 
