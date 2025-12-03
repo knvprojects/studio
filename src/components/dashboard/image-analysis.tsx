@@ -7,6 +7,8 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { FileUploader } from './file-uploader';
 import { AnalysisResultDisplay } from './analysis-result';
 import { AnalysisSkeleton } from './analysis-skeleton';
+import { Button } from '../ui/button';
+import { X } from 'lucide-react';
 
 interface ImageAnalysisProps {
   fileDataUri: string | null;
@@ -20,42 +22,48 @@ interface ImageAnalysisProps {
 export function ImageAnalysis({ fileDataUri, result, isLoading, onFileSelect, resetState }: ImageAnalysisProps) {
   return (
     <Card className="shadow-lg">
-      <CardHeader>
-        <CardTitle>AI-Generated Image Detection</CardTitle>
-        <CardDescription>Upload an image to check for signs of AI generation using various forensic analysis techniques.</CardDescription>
+      <CardHeader className="flex flex-row items-start justify-between">
+        <div>
+          <CardTitle>AI-Generated Image Detection</CardTitle>
+          <CardDescription>Upload an image to check for signs of AI generation using various forensic analysis techniques.</CardDescription>
+        </div>
+        {(fileDataUri || result || isLoading) && (
+          <Button variant="ghost" size="icon" onClick={resetState} aria-label="Clear analysis">
+            <X className="h-5 w-5" />
+          </Button>
+        )}
       </CardHeader>
       <CardContent className="space-y-8">
-        <div className="flex flex-col items-center gap-4">
-          <h3 className="w-full text-lg font-semibold border-b pb-2">Upload Image</h3>
-          {!fileDataUri && !isLoading && (
-            <FileUploader
-              onFileSelect={onFileSelect}
-              accept="image/*"
-              fileTypeDescription="image"
-            />
-          )}
-
-          {(fileDataUri || isLoading) && (
-            <div className="relative aspect-video w-full max-w-md overflow-hidden rounded-lg border bg-muted">
-              {fileDataUri ? (
-                <Image
-                  src={fileDataUri}
-                  alt="Uploaded image"
-                  fill
-                  objectFit="contain"
-                />
-              ) : (
-                <div className="h-full w-full animate-pulse bg-muted"></div>
-              )}
+        {!fileDataUri && !isLoading ? (
+          <FileUploader
+            onFileSelect={onFileSelect}
+            accept="image/*"
+            fileTypeDescription="image"
+          />
+        ) : isLoading ? (
+          <div className="space-y-8">
+            <div className="relative aspect-video w-full max-w-md mx-auto overflow-hidden rounded-lg border bg-muted">
+              <div className="h-full w-full animate-pulse bg-muted"></div>
             </div>
-          )}
-        </div>
-
-        {(isLoading || result) && (
-           <div className="flex flex-col gap-4">
+            <div className="flex flex-col gap-4">
               <h3 className="font-semibold text-lg border-b pb-2">Analysis Report</h3>
-              {isLoading && <AnalysisSkeleton />}
-              {result && fileDataUri && <AnalysisResultDisplay image={fileDataUri} result={result} onReset={resetState} />}
+              <AnalysisSkeleton />
+            </div>
+          </div>
+        ) : result && fileDataUri && (
+          <div className="space-y-8">
+            <div className="relative aspect-video w-full max-w-md mx-auto overflow-hidden rounded-lg border bg-muted">
+              <Image
+                src={fileDataUri}
+                alt="Uploaded image"
+                fill
+                objectFit="contain"
+              />
+            </div>
+            <div className="flex flex-col gap-4">
+              <h3 className="font-semibold text-lg border-b pb-2">Analysis Report</h3>
+              <AnalysisResultDisplay image={fileDataUri} result={result} onReset={resetState} />
+            </div>
           </div>
         )}
         
