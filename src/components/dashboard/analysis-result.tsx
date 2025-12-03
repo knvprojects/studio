@@ -83,7 +83,6 @@ export function AnalysisResultDisplay({ result, onReset, image, video }: Analysi
                 <BarChart3 className="h-5 w-5" />
                 Forensic Indicators
               </CardTitle>
-              <CardDescription>Key factors contributing to the overall score.</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               {forensicIndicators.map((indicator) => (
@@ -104,7 +103,6 @@ export function AnalysisResultDisplay({ result, onReset, image, video }: Analysi
                 <AlertTriangle className="h-5 w-5" />
                 Detected Anomalies
               </CardTitle>
-              <CardDescription>Detailed explanation of the analysis findings.</CardDescription>
             </CardHeader>
             <CardContent className="text-sm max-h-48 overflow-y-auto">
               <p>{anomalies || 'No significant anomalies detected.'}</p>
