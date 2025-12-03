@@ -22,6 +22,11 @@ const ClassifyGanFingerprintInputSchema = z.object({
 
 export type ClassifyGanFingerprintInput = z.infer<typeof ClassifyGanFingerprintInputSchema>;
 
+const ForensicIndicatorSchema = z.object({
+  name: z.string().describe('Name of the forensic indicator.'),
+  score: z.number().describe('Score from 0 to 1 for this indicator.'),
+});
+
 const ClassifyGanFingerprintOutputSchema = z.object({
   sourceModel: z
     .string()
@@ -32,6 +37,11 @@ const ClassifyGanFingerprintOutputSchema = z.object({
     .describe('The confidence level (0-1) of the classification.')
     .optional(),
   details: z.string().describe('Additional details about the GAN fingerprint analysis.').optional(),
+  forensicIndicators: z
+    .array(ForensicIndicatorSchema)
+    .describe(
+      'A list of forensic indicators and their scores, such as Residual Noise Patterns and Up-sampling Artifacts.'
+    ),
 });
 
 export type ClassifyGanFingerprintOutput = z.infer<typeof ClassifyGanFingerprintOutputSchema>;
@@ -50,7 +60,11 @@ const classifyGanFingerprintPrompt = ai.definePrompt({
 
   Analyze the provided image and determine the most likely source model used to generate it.  Consider factors such as image artifacts, frequency patterns, and other distinguishing characteristics.
 
-  If a source model can be determined, provide the name of the model and a confidence level (0-1) for the classification.  Also include any relevant details about the analysis.
+  Provide:
+  1. The name of the source model (e.g., Stable Diffusion, DALL·E).
+  2. A confidence level (0-1) for the classification.
+  3. A list of scores for the following forensic indicators related to source identification: 'Residual Noise Patterns', 'Up-sampling Artifacts', 'Color Space Aberrations', 'Model-specific Artifacts'. Each score should be a number between 0 and 1, where a higher score indicates a stronger presence of that indicator.
+  4. Additional details about the analysis.
 
   If the source model cannot be confidently determined, indicate that the source is unknown and provide any relevant details about why the classification is uncertain.
 

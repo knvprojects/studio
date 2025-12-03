@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter }
 import { FileUploader } from './file-uploader';
 import { Fingerprint, RefreshCcw } from 'lucide-react';
 import { Button } from '../ui/button';
+import { Progress } from '../ui/progress';
 
 interface GanAnalysisProps {
   fileDataUri: string | null;
@@ -18,6 +19,8 @@ interface GanAnalysisProps {
 
 
 export function GanAnalysis({ fileDataUri, result, isLoading, onFileSelect, resetState }: GanAnalysisProps) {
+  const forensicIndicators = result?.forensicIndicators || [];
+
   return (
     <Card className="shadow-lg">
       <CardHeader>
@@ -27,7 +30,7 @@ export function GanAnalysis({ fileDataUri, result, isLoading, onFileSelect, rese
       <CardContent className="space-y-8">
         <div className="flex flex-col items-center gap-4">
           <h3 className="w-full text-lg font-semibold border-b pb-2">Upload Media</h3>
-          {!fileDataUri && !isLoading && <FileUploader onFileSelect={onFileSelect} accept="image/*" fileTypeDescription="image" />}
+          {!fileDataUri && !isLoading && <FileUploader onFileSelect={onFileSelect} accept="*/*" fileTypeDescription="any file" />}
           
           {(fileDataUri || isLoading) && (
             <div className="relative aspect-video w-full max-w-md overflow-hidden rounded-lg border bg-muted">
@@ -50,15 +53,33 @@ export function GanAnalysis({ fileDataUri, result, isLoading, onFileSelect, rese
                         <CardTitle className="flex items-center gap-2"><Fingerprint className="h-5 w-5" />GAN Fingerprint</CardTitle>
                         <CardDescription>Identified source model if applicable.</CardDescription>
                     </CardHeader>
-                    <CardContent className="grid sm:grid-cols-2 gap-6 items-center">
-                        <div className="text-center py-4 rounded-lg bg-muted">
-                            <p className="text-sm text-muted-foreground">Source Model</p>
-                            <p className="text-3xl font-bold">{result.sourceModel || 'Unknown'}</p>
+                    <CardContent className="space-y-4">
+                        <div className="grid sm:grid-cols-2 gap-6 items-center">
+                            <div className="text-center py-4 rounded-lg bg-muted">
+                                <p className="text-sm text-muted-foreground">Source Model</p>
+                                <p className="text-3xl font-bold">{result.sourceModel || 'Unknown'}</p>
+                            </div>
+                            <div className="text-center py-4 rounded-lg bg-muted">
+                                <p className="text-sm text-muted-foreground">Confidence</p>
+                                <p className="text-3xl font-bold">{Math.round((result.confidence || 0) * 100)}%</p>
+                            </div>
                         </div>
-                        <div className="text-center py-4 rounded-lg bg-muted">
-                            <p className="text-sm text-muted-foreground">Confidence</p>
-                            <p className="text-3xl font-bold">{Math.round((result.confidence || 0) * 100)}%</p>
-                        </div>
+
+                        {forensicIndicators.length > 0 && (
+                            <div className="space-y-4 pt-4 mt-4 border-t">
+                                 <h4 className="font-medium">Forensic Indicators</h4>
+                                {forensicIndicators.map((indicator) => (
+                                    <div key={indicator.name} className="space-y-1">
+                                    <div className="flex justify-between items-center text-sm">
+                                        <span className="font-medium">{indicator.name}</span>
+                                        <span className="text-muted-foreground">{Math.round(indicator.score * 100)}%</span>
+                                    </div>
+                                    <Progress value={indicator.score * 100} className="h-2" indicatorClassName={indicator.score > 0.5 ? 'bg-destructive' : 'bg-accent'}/>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+
                         {result.details && <p className="sm:col-span-2 text-muted-foreground text-sm pt-4 border-t"><strong>Details:</strong> {result.details}</p>}
                     </CardContent>
                     <CardFooter>
@@ -73,7 +94,7 @@ export function GanAnalysis({ fileDataUri, result, isLoading, onFileSelect, rese
         
         {!isLoading && !result && !fileDataUri && (
           <div className="flex flex-col items-center justify-center h-full text-center p-8 border border-dashed rounded-lg bg-card text-muted-foreground">
-              <p>Upload an image to see the GAN fingerprint analysis.</p>
+              <p>Upload a file to see the GAN fingerprint analysis.</p>
           </div>
         )}
       </CardContent>
