@@ -19,13 +19,23 @@ const ProcessVideoForDeepfakesInputSchema = z.object({
 });
 export type ProcessVideoForDeepfakesInput = z.infer<typeof ProcessVideoForDeepfakesInputSchema>;
 
+const ForensicIndicatorSchema = z.object({
+  name: z.string().describe('Name of the forensic indicator.'),
+  score: z.number().describe('Score from 0 to 1 for this indicator.'),
+});
+
 const ProcessVideoForDeepfakesOutputSchema = z.object({
   deepfakeProbability: z
     .number()
     .describe('The probability (0-1) that the video is a deepfake.'),
   anomalyExplanation: z
     .string()
-    .describe('Explanation of detected anomalies indicating a deepfake.'),
+    .describe('A detailed explanation of detected anomalies indicating a deepfake.'),
+  forensicIndicators: z
+    .array(ForensicIndicatorSchema)
+    .describe(
+      'A list of forensic indicators and their scores, such as Unnatural Blinking, Head Pose Mismatch, and Lip-Sync Issues.'
+    ),
 });
 export type ProcessVideoForDeepfakesOutput = z.infer<typeof ProcessVideoForDeepfakesOutputSchema>;
 
@@ -39,11 +49,16 @@ const processVideoForDeepfakesPrompt = ai.definePrompt({
   name: 'processVideoForDeepfakesPrompt',
   input: {schema: ProcessVideoForDeepfakesInputSchema},
   output: {schema: ProcessVideoForDeepfakesOutputSchema},
-  prompt: `Analyze the following video for deepfake indicators such as unnatural blinking,
-head pose mismatch, and lip-sync issues. Provide a probability score (0-1) indicating the likelihood
-that the video is a deepfake and explain the detected anomalies.
+  prompt: `Analyze the following video for deepfake indicators.
 
-Video: {{media url=videoDataUri}}`,
+Video: {{media url=videoDataUri}}
+
+Based on your analysis, provide:
+1.  A probability score (0-1) indicating the likelihood that the video is a deepfake.
+2.  A detailed explanation of detected anomalies.
+3.  A list of scores for the following forensic indicators: 'Unnatural Blinking', 'Head Pose Mismatch', and 'Lip-Sync Issues'. Each score should be a number between 0 and 1, where a higher score indicates a higher likelihood of that deepfake indicator being present. These scores should correlate with your overall probability.
+
+Return the deepfake probability, a detailed anomaly explanation, and the forensic indicator scores.`,
 });
 
 const processVideoForDeepfakesFlow = ai.defineFlow(

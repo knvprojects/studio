@@ -21,6 +21,11 @@ const AnalyzeUploadedImageInputSchema = z.object({
 });
 export type AnalyzeUploadedImageInput = z.infer<typeof AnalyzeUploadedImageInputSchema>;
 
+const ForensicIndicatorSchema = z.object({
+  name: z.string().describe('Name of the forensic indicator.'),
+  score: z.number().describe('Score from 0 to 1 for this indicator.'),
+});
+
 const AnalyzeUploadedImageOutputSchema = z.object({
   isAiGenerated: z
     .boolean()
@@ -33,7 +38,12 @@ const AnalyzeUploadedImageOutputSchema = z.object({
   anomalies: z
     .string()
     .describe(
-      'A description of any anomalies detected in the image, such as unusual textures, frequency patterns, or GAN fingerprints.'
+      'A detailed explanation of any anomalies detected in the image, such as unusual textures, frequency patterns, or GAN fingerprints.'
+    ),
+  forensicIndicators: z
+    .array(ForensicIndicatorSchema)
+    .describe(
+      'A list of forensic indicators and their scores, such as GAN Fingerprints, CNN/ViT Models, Texture Analysis, and Frequency Spectrum.'
     ),
 });
 export type AnalyzeUploadedImageOutput = z.infer<typeof AnalyzeUploadedImageOutputSchema>;
@@ -48,15 +58,19 @@ const analyzeUploadedImagePrompt = ai.definePrompt({
   name: 'analyzeUploadedImagePrompt',
   input: {schema: AnalyzeUploadedImageInputSchema},
   output: {schema: AnalyzeUploadedImageOutputSchema},
-  prompt: `You are an expert in detecting AI-generated images. Analyze the provided image for signs of AI generation, including GAN fingerprints, and anomalies.
+  prompt: `You are an expert in detecting AI-generated images. Analyze the provided image for signs of AI generation.
 
 Analyze the following image:
 
 {{media url=photoDataUri}}
 
-Based on your analysis, determine the probability (0-1) that the image is AI-generated.  Also, describe any specific anomalies detected in the image that suggest AI generation, such as unusual textures, frequency patterns, or GAN fingerprints.  Set isAiGenerated to true if the probability is above 0.5.
+Based on your analysis, provide:
+1.  A probability (0-1) that the image is AI-generated.
+2.  Set isAiGenerated to true if the probability is above 0.5.
+3.  A detailed explanation of any anomalies detected (e.g., unusual textures, lighting inconsistencies, anatomical errors).
+4.  A list of scores for the following forensic indicators: 'GAN Fingerprints', 'Model Artifacts', 'Texture Analysis', and 'Frequency Spectrum'. Each score should be a number between 0 and 1, where a higher score indicates a higher likelihood of AI generation for that specific indicator. These scores should correlate with your overall probability.
 
-Return the probability, a description of anomalies and set isAiGenerated to true if the probability is above 0.5.`,
+Return the probability, isAiGenerated flag, a detailed anomaly explanation, and the forensic indicator scores.`,
 });
 
 const analyzeUploadedImageFlow = ai.defineFlow(
