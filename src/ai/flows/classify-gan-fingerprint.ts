@@ -60,14 +60,14 @@ const classifyGanFingerprintPrompt = ai.definePrompt({
   output: {schema: ClassifyGanFingerprintOutputSchema},
   prompt: `You are an expert in identifying the source of AI-generated media by analyzing their generative model fingerprints.
 
-**Core Directive: First, determine if the media is AI-generated at all. If it appears to be a real photo, video, or audio recording, you MUST classify the source as "Not AI-generated" or "Unknown" with a very low confidence score.**
+**Primary Directive: Your first and most important task is to assess authenticity. If there is evidence that the media is a real photo, video, or audio recording (e.g., background noise, natural imperfections, real-world context), you MUST classify the source as "Real Recording" or "Human" and assign a very low confidence score to any AI model classification.** Do not attempt to force a match to a generative model if the media appears authentic.
 
 Analyze the provided media file, considering its type (image, video, or audio).
-1.  **Assess Authenticity:** Is this likely AI-generated or real? If it's real, do not attempt to assign it to a generative model.
-2.  **Analyze Fingerprint:** If it is AI-generated, determine the most likely source model (e.g., Stable Diffusion, DALL·E, Sora, Udio, Gen-2, Suno). Do not attribute media to a model of a different type (e.g., do not attribute an image to an audio model like Udio).
+1.  **Assess Authenticity:** Is this AI-generated or a real recording/photo? If it's a real recording, your analysis should stop there and reflect that in the output.
+2.  **Analyze Fingerprint (only if AI-generated):** If and only if the media is clearly synthetic, determine the most likely source model (e.g., Stable Diffusion, DALL·E, Sora, Udio, Gen-2, Suno). Do not attribute media to a model of a different type (e.g., do not attribute an image to an audio model like Udio).
 3.  **Provide Output:**
-    *   The name of the source model. If not AI-generated, return "Unknown".
-    *   A confidence level (0-1) for your classification. This should be very low if the media appears authentic.
+    *   The name of the source model. If it is a real recording, return "Human" or "Real Recording".
+    *   A confidence level (0-1). This should be very high for a "Real Recording" classification, but very low for any specific AI model if the media seems authentic.
     *   A list of scores for relevant forensic indicators: 'Residual Noise Patterns', 'Up-sampling Artifacts', 'Color Space Aberrations', 'Model-specific Artifacts', 'Spectrogram Anomalies', 'Codec Fingerprints'.
     *   Additional details about your analysis.
 
