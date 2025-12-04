@@ -1,9 +1,10 @@
+
 'use client';
 
-import { useUser, useFirestore, useDoc, useMemoFirebase, updateDocumentNonBlocking } from '@/firebase';
+import { useUser, useFirestore, useDoc, useMemoFirebase } from '@/firebase';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
-import { doc } from 'firebase/firestore';
+import { doc, updateDoc } from 'firebase/firestore';
 import { useForm, type SubmitHandler } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -12,6 +13,8 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
 import { Header } from '@/components/layout/header';
+import { FirestorePermissionError } from '@/firebase/errors';
+import { errorEmitter } from '@/firebase/error-emitter';
 
 const profileSchema = z.object({
   username: z.string().min(3, { message: 'Username must be at least 3 characters' }),
@@ -54,18 +57,30 @@ export default function ProfilePage() {
     }
   }, [userProfile, setValue]);
 
-  const onSubmit: SubmitHandler<ProfileValues> = (data) => {
+  const onSubmit: SubmitHandler<ProfileValues> = async (data) => {
     if (!userDocRef) return;
     setIsSaving(true);
     
-    updateDocumentNonBlocking(userDocRef, { username: data.username });
+    try {
+      await updateDoc(userDocRef, { username: data.username });
 
-    toast({
-      title: 'Profile Updated',
-      description: 'Your username has been successfully updated.',
-    });
-    
-    router.push('/');
+      toast({
+        title: 'Profile Updated',
+        description: 'Your username has been successfully updated.',
+      });
+      
+      router.push('/');
+
+    } catch (e: any) {
+        const permissionError = new FirestorePermissionError({
+          path: userDocRef.path,
+          operation: 'update',
+          requestResourceData: data,
+        });
+        errorEmitter.emit('permission-error', permissionError);
+    } finally {
+        setIsSaving(false);
+    }
   };
 
   if (isUserLoading || isProfileLoading || !user) {
