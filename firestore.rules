@@ -70,17 +70,6 @@ service cloud.firestore {
     }
 
     /**
-     * Validates a User document on update.
-     * Ensures the 'id' and 'email' fields remain unchanged, preventing ownership tampering.
-     */
-    function isUpdatingOwnUserDocument() {
-      // The 'id' and 'email' fields linking the document to the user must be immutable.
-      let isIdUnchanged = !('id' in request.resource.data) || request.resource.data.id == resource.data.id;
-      let isEmailUnchanged = !('email' in request.resource.data) || request.resource.data.email == resource.data.email;
-      return isIdUnchanged && isEmailUnchanged;
-    }
-
-    /**
      * Validates a new AnalysisReport document on creation.
      * Ensures the internal 'userId' field correctly points back to the owner.
      */
@@ -112,7 +101,7 @@ service cloud.firestore {
       allow get: if isOwner(userId);
       allow list: if false;
       allow create: if isCreatingOwnUserDocument(userId);
-      allow update: if isExistingOwner(userId) && isUpdatingOwnUserDocument();
+      allow update: if isOwner(userId) && request.resource.data.id == resource.data.id;
       allow delete: if isExistingOwner(userId);
     }
 
