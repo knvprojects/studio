@@ -50,7 +50,7 @@ export function WelcomeSplash({ onAnimationComplete }: WelcomeSplashProps) {
           "flex flex-col items-center gap-4 text-foreground transition-all duration-1000 ease-in-out",
           animationState === 'fading-in' && 'opacity-100 scale-100',
           animationState === 'initial' && 'opacity-0 scale-90',
-          animationState === 'animating-out' && 'opacity-0 scale-[0.1] translate-x-[45vw] -translate-y-[45vh]',
+          animationState === 'animating-out' && 'opacity-0 scale-50 translate-x-[45vw] -translate-y-[45vh]',
         )}
       >
         <ShieldCheck className="h-16 w-16 text-primary" />
