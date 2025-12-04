@@ -101,7 +101,7 @@ service cloud.firestore {
       allow get: if isOwner(userId);
       allow list: if false;
       allow create: if isCreatingOwnUserDocument(userId);
-      allow update: if isOwner(userId) && request.resource.data.id == resource.data.id;
+      allow update: if isOwner(userId);
       allow delete: if isExistingOwner(userId);
     }
 
