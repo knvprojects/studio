@@ -75,7 +75,9 @@ service cloud.firestore {
      */
     function isUpdatingOwnUserDocument() {
       // The 'id' field linking the document to the user must be immutable.
-      return request.resource.data.id == resource.data.id;
+      // We check if the incoming request data does NOT contain an 'id' field,
+      // or if it does, that it matches the existing resource's id.
+      return !('id' in request.resource.data) || request.resource.data.id == resource.data.id;
     }
 
     /**
