@@ -3,24 +3,11 @@
 
 import { useUser, useFirestore, useDoc, useMemoFirebase } from '@/firebase';
 import { useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
-import { doc, updateDoc } from 'firebase/firestore';
-import { useForm, type SubmitHandler } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
-import { Button } from '@/components/ui/button';
+import { useEffect } from 'react';
+import { doc } from 'firebase/firestore';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { useToast } from '@/hooks/use-toast';
 import { Header } from '@/components/layout/header';
-import { FirestorePermissionError } from '@/firebase/errors';
-import { errorEmitter } from '@/firebase/error-emitter';
-
-const profileSchema = z.object({
-  username: z.string().min(3, { message: 'Username must be at least 3 characters' }),
-});
-
-type ProfileValues = z.infer<typeof profileSchema>;
 
 interface UserProfile {
   username: string;
@@ -30,20 +17,9 @@ export default function ProfilePage() {
   const { user, isUserLoading } = useUser();
   const firestore = useFirestore();
   const router = useRouter();
-  const { toast } = useToast();
-  const [isSaving, setIsSaving] = useState(false);
 
   const userDocRef = useMemoFirebase(() => (user ? doc(firestore, 'users', user.uid) : null), [user, firestore]);
   const { data: userProfile, isLoading: isProfileLoading } = useDoc<UserProfile>(userDocRef);
-
-  const {
-    register,
-    handleSubmit,
-    setValue,
-    formState: { errors },
-  } = useForm<ProfileValues>({
-    resolver: zodResolver(profileSchema),
-  });
 
   useEffect(() => {
     if (!isUserLoading && !user) {
@@ -51,37 +27,6 @@ export default function ProfilePage() {
     }
   }, [user, isUserLoading, router]);
 
-  useEffect(() => {
-    if (userProfile) {
-      setValue('username', userProfile.username);
-    }
-  }, [userProfile, setValue]);
-
-  const onSubmit: SubmitHandler<ProfileValues> = async (data) => {
-    if (!userDocRef) return;
-    setIsSaving(true);
-    
-    try {
-      await updateDoc(userDocRef, { username: data.username });
-
-      toast({
-        title: 'Profile Updated',
-        description: 'Your username has been successfully updated.',
-      });
-      
-      router.push('/');
-
-    } catch (e: any) {
-        const permissionError = new FirestorePermissionError({
-          path: userDocRef.path,
-          operation: 'update',
-          requestResourceData: data,
-        });
-        errorEmitter.emit('permission-error', permissionError);
-    } finally {
-        setIsSaving(false);
-    }
-  };
 
   if (isUserLoading || isProfileLoading || !user) {
     return (
@@ -97,24 +42,20 @@ export default function ProfilePage() {
       <main className="flex flex-1 items-center justify-center p-4">
         <Card className="w-full max-w-md">
           <CardHeader>
-            <CardTitle>Your Profile</CardTitle>
-            <CardDescription>View and update your profile information.</CardDescription>
+            <CardTitle>View Profile</CardTitle>
+            <CardDescription>Your profile information is shown below.</CardDescription>
           </CardHeader>
           <CardContent>
-            <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+            <div className="space-y-4">
               <div className="space-y-2">
                 <label htmlFor="email" className="text-sm font-medium">Email</label>
                 <Input id="email" value={user.email || ''} disabled className="bg-muted/50" />
               </div>
               <div className="space-y-2">
                  <label htmlFor="username" className="text-sm font-medium">Username</label>
-                <Input {...register('username')} id="username" placeholder="Username" disabled={isSaving} />
-                {errors.username && <p className="text-xs text-destructive">{errors.username.message}</p>}
+                <Input id="username" value={userProfile?.username || ''} disabled className="bg-muted/50" />
               </div>
-              <Button type="submit" className="w-full" disabled={isSaving}>
-                {isSaving ? 'Saving...' : 'Save Changes'}
-              </Button>
-            </form>
+            </div>
           </CardContent>
         </Card>
       </main>
