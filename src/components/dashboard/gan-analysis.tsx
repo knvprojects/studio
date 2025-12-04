@@ -100,7 +100,7 @@ export function GanAnalysis({ fileDataUri, result, isLoading, onFileSelect, rese
                                           </div>
                                         </TooltipTrigger>
                                         <TooltipContent>
-                                          <p className="max-w-xs">The confidence score represents how certain the AI model is about its classification. A high score means the model found strong evidence pointing to a specific generative model.</p>
+                                          <p className="max-w-xs">This score represents how certain the AI model is about the identified source. A high score means the model found strong evidence for its conclusion (e.g., that it's a real recording, or from a specific AI model).</p>
                                         </TooltipContent>
                                       </Tooltip>
                                       <p className="text-3xl font-bold">{Math.round((result.confidence || 0) * 100)}%</p>
