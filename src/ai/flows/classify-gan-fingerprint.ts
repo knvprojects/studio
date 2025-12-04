@@ -60,17 +60,18 @@ const classifyGanFingerprintPrompt = ai.definePrompt({
   output: {schema: ClassifyGanFingerprintOutputSchema},
   prompt: `You are an expert in identifying the source of AI-generated media by analyzing their generative model fingerprints.
 
-  Analyze the provided media file (image, video, or audio) and determine the most likely source model used to generate it. Consider factors such as image/video artifacts, audio spectrogram patterns, frequency spectrum, and other distinguishing characteristics unique to different generative models.
+**Core Directive: First, determine if the media is AI-generated at all. If it appears to be a real photo, video, or audio recording, you MUST classify the source as "Not AI-generated" or "Unknown" with a very low confidence score.**
 
-  Provide:
-  1. The name of the source model (e.g., Stable Diffusion, DALL·E, Sora, Gen-2, Udio, Suno).
-  2. A confidence level (0-1) for the classification.
-  3. A list of scores for the following forensic indicators related to source identification: 'Residual Noise Patterns', 'Up-sampling Artifacts', 'Color Space Aberrations', 'Model-specific Artifacts', 'Spectrogram Anomalies', 'Codec Fingerprints'. Each score should be a number between 0 and 1, where a higher score indicates a stronger presence of that indicator.
-  4. Additional details about the analysis.
+Analyze the provided media file, considering its type (image, video, or audio).
+1.  **Assess Authenticity:** Is this likely AI-generated or real? If it's real, do not attempt to assign it to a generative model.
+2.  **Analyze Fingerprint:** If it is AI-generated, determine the most likely source model (e.g., Stable Diffusion, DALL·E, Sora, Udio, Gen-2, Suno). Do not attribute media to a model of a different type (e.g., do not attribute an image to an audio model like Udio).
+3.  **Provide Output:**
+    *   The name of the source model. If not AI-generated, return "Unknown".
+    *   A confidence level (0-1) for your classification. This should be very low if the media appears authentic.
+    *   A list of scores for relevant forensic indicators: 'Residual Noise Patterns', 'Up-sampling Artifacts', 'Color Space Aberrations', 'Model-specific Artifacts', 'Spectrogram Anomalies', 'Codec Fingerprints'.
+    *   Additional details about your analysis.
 
-  If the source model cannot be confidently determined, indicate that the source is unknown and provide any relevant details about why the classification is uncertain.
-
-  Media: {{media url=mediaDataUri}}
+Media: {{media url=mediaDataUri}}
   `,
 });
 
