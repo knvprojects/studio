@@ -1,7 +1,6 @@
 'use client';
 
-import { useUser, useFirestore, useDoc, useMemoFirebase } from '@/firebase';
-import { updateDocumentNonBlocking } from '@/firebase/non-blocking-updates';
+import { useUser, useFirestore, useDoc, useMemoFirebase, updateDocumentNonBlocking } from '@/firebase';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { doc } from 'firebase/firestore';
@@ -66,9 +65,7 @@ export default function ProfilePage() {
       description: 'Your username has been successfully updated.',
     });
     
-    // We don't get immediate feedback on success/failure, so we'll optimistically finish.
-    // Errors will be caught by the global error handler.
-    setTimeout(() => setIsSaving(false), 1000);
+    router.push('/');
   };
 
   if (isUserLoading || isProfileLoading || !user) {
