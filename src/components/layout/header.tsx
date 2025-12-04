@@ -1,7 +1,7 @@
 
 'use client';
 
-import { ShieldCheck, LogOut, Moon, Sun, Eye } from 'lucide-react';
+import { ShieldCheck, LogOut, Moon, Sun, User as UserIcon } from 'lucide-react';
 import Link from 'next/link';
 import { useUser, useFirestore, useDoc, useMemoFirebase } from '@/firebase';
 import { getAuth, signOut } from 'firebase/auth';
@@ -87,8 +87,8 @@ export function Header() {
                 <DropdownMenuSeparator />
                   <DropdownMenuItem asChild>
                     <Link href="/profile">
-                      <Eye className="mr-2 h-4 w-4" />
-                      <span>View Profile</span>
+                      <UserIcon className="mr-2 h-4 w-4" />
+                      <span>Edit Profile</span>
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuSub>
