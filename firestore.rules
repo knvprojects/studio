@@ -71,13 +71,13 @@ service cloud.firestore {
 
     /**
      * Validates a User document on update.
-     * Ensures the 'id' field remains unchanged, preventing ownership tampering.
+     * Ensures the 'id' and 'email' fields remain unchanged, preventing ownership tampering.
      */
     function isUpdatingOwnUserDocument() {
-      // The 'id' field linking the document to the user must be immutable.
-      // We check if the incoming request data does NOT contain an 'id' field,
-      // or if it does, that it matches the existing resource's id.
-      return !('id' in request.resource.data) || request.resource.data.id == resource.data.id;
+      // The 'id' and 'email' fields linking the document to the user must be immutable.
+      let isIdUnchanged = request.resource.data.id == resource.data.id;
+      let isEmailUnchanged = request.resource.data.email == resource.data.email;
+      return isIdUnchanged && isEmailUnchanged;
     }
 
     /**
