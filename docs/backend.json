@@ -1,0 +1,128 @@
+{
+  "entities": {
+    "User": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "User",
+      "type": "object",
+      "description": "Represents a user of the DeepFake Defender application.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the User entity."
+        },
+        "username": {
+          "type": "string",
+          "description": "The user's username."
+        },
+        "email": {
+          "type": "string",
+          "description": "The user's email address.",
+          "format": "email"
+        },
+        "registrationDate": {
+          "type": "string",
+          "description": "The date and time the user registered.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "username",
+        "email",
+        "registrationDate"
+      ]
+    },
+    "AnalysisReport": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "AnalysisReport",
+      "type": "object",
+      "description": "Represents a report generated after analyzing media for deepfakes.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the AnalysisReport entity."
+        },
+        "userId": {
+          "type": "string",
+          "description": "Reference to User. (Relationship: User 1:N AnalysisReport)"
+        },
+        "mediaFilename": {
+          "type": "string",
+          "description": "The filename of the analyzed media."
+        },
+        "analysisDate": {
+          "type": "string",
+          "description": "The date and time the analysis was performed.",
+          "format": "date-time"
+        },
+        "probabilityScore": {
+          "type": "number",
+          "description": "The probability score indicating whether the media is real or AI-generated."
+        },
+        "detectedAnomalies": {
+          "type": "string",
+          "description": "A text description of anomalies detected in the media."
+        },
+        "ganFingerprint": {
+          "type": "string",
+          "description": "The GAN fingerprint, if identified."
+        }
+      },
+      "required": [
+        "id",
+        "userId",
+        "mediaFilename",
+        "analysisDate",
+        "probabilityScore",
+        "detectedAnomalies"
+      ]
+    }
+  },
+  "auth": {
+    "providers": [
+      "password",
+      "anonymous"
+    ]
+  },
+  "firestore": {
+    "structure": [
+      {
+        "path": "/users/{userId}",
+        "definition": {
+          "entityName": "User",
+          "schema": {
+            "$ref": "#/backend/entities/User"
+          },
+          "description": "Stores user profile information. Only the authenticated user can read/write their own document.",
+          "params": [
+            {
+              "name": "userId",
+              "description": "The unique identifier for the user, obtained from Firebase Authentication."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/users/{userId}/analysisReports/{reportId}",
+        "definition": {
+          "entityName": "AnalysisReport",
+          "schema": {
+            "$ref": "#/backend/entities/AnalysisReport"
+          },
+          "description": "Stores analysis reports generated for each user. Includes userId to ensure proper ownership.  Only the authenticated user can read/write their own analysis reports.",
+          "params": [
+            {
+              "name": "userId",
+              "description": "The unique identifier for the user who owns the analysis report."
+            },
+            {
+              "name": "reportId",
+              "description": "The unique identifier for the analysis report."
+            }
+          ]
+        }
+      }
+    ],
+    "reasoning": "The Firestore structure is designed to ensure authorization independence, clarity, and scalability for the DeepFake Defender application. It leverages path-based ownership for user-specific data (AnalysisReports) to simplify security rules and enable efficient data retrieval. The design focuses on avoiding `get()` calls in security rules by storing user data directly under the `/users/{userId}` path and AnalysisReport under `/users/{userId}/analysisReports/{reportId}` path. \n\n*   **Authorization Independence:** Achieved by storing `AnalysisReport` documents within a user-specific subcollection (`/users/{userId}/analysisReports/{reportId}`). This eliminates the need to fetch parent user data for authorization, as all necessary context is implicitly available based on the path.\n*   **QAPs Support:** The path-based ownership (`/users/{userId}/analysisReports/{reportId}`) enables secure `list` operations. Security rules can easily restrict access to analysis reports based on the authenticated user ID, ensuring that users can only list and access their own reports. This also enables efficient querying, as indexes will be automatically created for the collection group `analysisReports`."
+  }
+}

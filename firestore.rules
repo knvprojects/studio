@@ -1,0 +1,132 @@
+/**
+ * This ruleset enforces a strict user-ownership security model for the DeepFake Defender application.
+ *
+ * Core Philosophy:
+ * A user is the sole owner of their data. They can only create, read, update, or delete documents
+ * that belong to them. There is no concept of public data or shared access in this model.
+ *
+ * Data Structure:
+ * The data is organized hierarchically. All user-specific information, including their profile
+ * (`/users/{userId}`) and their analysis reports (`/users/{userId}/analysisReports/{reportId}`),
+ * is nested under a path containing their unique user ID. This structure simplifies security
+ * rules by leveraging path-based authorization.
+ *
+ * Key Security Decisions:
+ * - User Enumeration is Disabled: Listing documents in the top-level `/users` collection is
+ *   explicitly forbidden to prevent attackers from discovering a list of all application users.
+ * - Strict Path-Based Ownership: All rules rely on the `{userId}` wildcard in the path to
+ *   determine ownership, which is fast and efficient.
+ * - Relational Integrity: On document creation, rules ensure that internal ID fields (like `User.id`
+ *   and `AnalysisReport.userId`) correctly match the user ID from the document path, enforcing
+ *   data consistency. These fields are immutable once set.
+ *
+ * Denormalization for Authorization:
+ * This ruleset inherently benefits from a denormalized structure. By placing `analysisReports`
+ * in a subcollection under the user, we avoid the need for costly `get()` calls to check
+ * ownership. The ownership context is provided directly by the document's path.
+ *
+ * Structural Segregation:
+ * The design uses separate collections and subcollections for different data types (`users` and
+ * `analysisReports`), which provides a clear and secure separation of concerns. All data is
+ * inherently private to the user.
+ */
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ------------------------------------------------------------------------
+    // Helper Functions
+    // ------------------------------------------------------------------------
+
+    /**
+     * Checks if the user is authenticated.
+     */
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    /**
+     * Checks if the currently authenticated user's ID matches the provided userId.
+     * This is the primary function for verifying document ownership.
+     */
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    /**
+     * Checks for ownership on an existing document. Used for update and delete
+     * operations to prevent acting on non-existent data.
+     */
+    function isExistingOwner(userId) {
+      return isOwner(userId) && resource != null;
+    }
+
+    /**
+     * Validates the data for a new User document on creation.
+     * Ensures the internal 'id' field matches the document's ID (which is the user's auth UID).
+     */
+    function isCreatingOwnUserDocument(userId) {
+      return isOwner(userId) && request.resource.data.id == userId;
+    }
+
+    /**
+     * Validates a User document on update.
+     * Ensures the 'id' field remains unchanged, preventing ownership tampering.
+     */
+    function isUpdatingOwnUserDocument() {
+      // The 'id' field linking the document to the user must be immutable.
+      return request.resource.data.id == resource.data.id;
+    }
+
+    /**
+     * Validates a new AnalysisReport document on creation.
+     * Ensures the internal 'userId' field correctly points back to the owner.
+     */
+    function isCreatingOwnReport(userId) {
+      return isOwner(userId) && request.resource.data.userId == userId;
+    }
+
+    /**
+     * Validates an AnalysisReport document on update.
+     * Ensures the 'userId' field remains unchanged, preventing the report from being reassigned.
+     */
+    function isUpdatingOwnReport() {
+      // The 'userId' field linking the report to its owner must be immutable.
+      return request.resource.data.userId == resource.data.userId;
+    }
+
+    // ------------------------------------------------------------------------
+    // Collection Rules
+    // ------------------------------------------------------------------------
+
+    /**
+     * @description Manages user profile documents.
+     * @path /users/{userId}
+     * @allow (create) An authenticated user creating their own user document for the first time.
+     * @deny (list) Any user attempting to list all documents in the `/users` collection.
+     * @principle Restricts access to a user's own data tree and prevents user enumeration.
+     */
+    match /users/{userId} {
+      allow get: if isOwner(userId);
+      allow list: if false;
+      allow create: if isCreatingOwnUserDocument(userId);
+      allow update: if isExistingOwner(userId) && isUpdatingOwnUserDocument();
+      allow delete: if isExistingOwner(userId);
+    }
+
+    /**
+     * @description Manages user-specific analysis reports.
+     * @path /users/{userId}/analysisReports/{reportId}
+     * @allow (create) An authenticated user creating a new analysis report for themselves.
+     * @deny (get) An authenticated user trying to read an analysis report belonging to another user.
+     * @principle Enforces document ownership for all operations within a user's private subcollection.
+     */
+    match /users/{userId}/analysisReports/{reportId} {
+      allow get: if isOwner(userId);
+      allow list: if isOwner(userId);
+      allow create: if isCreatingOwnReport(userId);
+      allow update: if isExistingOwner(userId) && isUpdatingOwnReport();
+      allow delete: if isExistingOwner(userId);
+    }
+  }
+}
