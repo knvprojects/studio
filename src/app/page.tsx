@@ -10,7 +10,7 @@ import { WelcomeSplash } from '@/components/dashboard/welcome-splash';
 export default function Home() {
   const { user, isUserLoading } = useUser();
   const router = useRouter();
-  const [showWelcome, setShowWelcome] = useState(true);
+  const [showWelcome, setShowWelcome] = useState(false);
 
   useEffect(() => {
     if (!isUserLoading && !user) {
@@ -18,11 +18,21 @@ export default function Home() {
     }
   }, [user, isUserLoading, router]);
 
+  useEffect(() => {
+    // Check session storage to see if we should show the welcome screen
+    const justLoggedIn = sessionStorage.getItem('justLoggedIn');
+    if (justLoggedIn === 'true') {
+      setShowWelcome(true);
+      // Clear the flag so it doesn't show again on subsequent navigations
+      sessionStorage.removeItem('justLoggedIn');
+    }
+  }, []);
+
   const handleAnimationComplete = () => {
     setShowWelcome(false);
   };
 
-  if (isUserLoading || !user) {
+  if (isUserLoading || (!user && !showWelcome)) {
     return (
       <div className="flex h-screen w-full items-center justify-center bg-background">
         <div className="h-8 w-8 animate-spin rounded-full border-4 border-dashed border-primary"></div>
@@ -30,7 +40,7 @@ export default function Home() {
     );
   }
 
-  if (showWelcome) {
+  if (showWelcome && user) {
     return <WelcomeSplash onAnimationComplete={handleAnimationComplete} />;
   }
 

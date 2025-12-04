@@ -64,6 +64,7 @@ export function AuthForm() {
 
   useEffect(() => {
     if (!isUserLoading && user) {
+      sessionStorage.setItem('justLoggedIn', 'true');
       router.push('/');
     }
   }, [user, isUserLoading, router]);
@@ -73,7 +74,7 @@ export function AuthForm() {
     try {
       await signInWithEmailAndPassword(auth, data.email, data.password);
       toast({ title: 'Login successful!' });
-      router.push('/');
+      // The useEffect will handle the redirection and setting the session flag
     } catch (error) {
       const authError = error as AuthError;
       toast({
