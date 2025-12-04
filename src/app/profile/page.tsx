@@ -28,7 +28,7 @@ export default function ProfilePage() {
   const firestore = useFirestore();
   const router = useRouter();
   const { toast } = useToast();
-  const [isLoading, setIsLoading] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
 
   const userDocRef = useMemoFirebase(() => (user ? doc(firestore, 'users', user.uid) : null), [user, firestore]);
   const { data: userProfile, isLoading: isProfileLoading } = useDoc<UserProfile>(userDocRef);
@@ -54,25 +54,20 @@ export default function ProfilePage() {
     }
   }, [userProfile, setValue]);
 
-  const onSubmit: SubmitHandler<ProfileValues> = async (data) => {
+  const onSubmit: SubmitHandler<ProfileValues> = (data) => {
     if (!userDocRef) return;
-    setIsLoading(true);
+    setIsSaving(true);
     
-    try {
-      updateDocumentNonBlocking(userDocRef, { username: data.username });
-      toast({
-        title: 'Profile Updated',
-        description: 'Your username has been successfully updated.',
-      });
-    } catch (error) {
-      toast({
-        variant: 'destructive',
-        title: 'Update Failed',
-        description: 'Could not update your username. Please try again.',
-      });
-    } finally {
-      setIsLoading(false);
-    }
+    updateDocumentNonBlocking(userDocRef, { username: data.username });
+
+    toast({
+      title: 'Profile Updated',
+      description: 'Your username has been successfully updated.',
+    });
+    
+    // We don't get immediate feedback on success/failure, so we'll optimistically finish.
+    // Errors will be caught by the global error handler.
+    setTimeout(() => setIsSaving(false), 1000);
   };
 
   if (isUserLoading || isProfileLoading || !user) {
@@ -100,11 +95,11 @@ export default function ProfilePage() {
               </div>
               <div className="space-y-2">
                  <label htmlFor="username" className="text-sm font-medium">Username</label>
-                <Input {...register('username')} id="username" placeholder="Username" disabled={isLoading} />
+                <Input {...register('username')} id="username" placeholder="Username" disabled={isSaving} />
                 {errors.username && <p className="text-xs text-destructive">{errors.username.message}</p>}
               </div>
-              <Button type="submit" className="w-full" disabled={isLoading}>
-                {isLoading ? 'Saving...' : 'Save Changes'}
+              <Button type="submit" className="w-full" disabled={isSaving}>
+                {isSaving ? 'Saving...' : 'Save Changes'}
               </Button>
             </form>
           </CardContent>
