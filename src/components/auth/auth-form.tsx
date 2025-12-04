@@ -10,13 +10,13 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
 import { useRouter } from 'next/navigation';
-import { useAuth, useUser, useFirestore } from '@/firebase';
+import { useAuth, useUser, useFirestore, setDocumentNonBlocking } from '@/firebase';
 import { 
   createUserWithEmailAndPassword, 
   signInWithEmailAndPassword,
   type AuthError
 } from 'firebase/auth';
-import { doc, setDoc } from 'firebase/firestore';
+import { doc } from 'firebase/firestore';
 
 
 const loginSchema = z.object({
@@ -93,12 +93,13 @@ export function AuthForm() {
       const newUser = userCredential.user;
 
       // Create a user document in Firestore
-      await setDoc(doc(firestore, "users", newUser.uid), {
+      const userDocRef = doc(firestore, "users", newUser.uid);
+      setDocumentNonBlocking(userDocRef, {
         id: newUser.uid,
         username: data.username,
         email: data.email,
         registrationDate: new Date().toISOString(),
-      });
+      }, { merge: false });
 
       toast({ title: 'Registration successful!', description: 'You can now log in.' });
       toggleView(); // Switch to login view after successful registration

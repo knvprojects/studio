@@ -1,9 +1,10 @@
 'use client';
 
-import { ShieldCheck, LogOut, User as UserIcon, Moon, Sun } from 'lucide-react';
+import { ShieldCheck, LogOut, User as UserIcon, Moon, Sun, Edit } from 'lucide-react';
 import Link from 'next/link';
-import { useUser } from '@/firebase';
+import { useUser, useFirestore, useDoc, useMemoFirebase } from '@/firebase';
 import { getAuth, signOut } from 'firebase/auth';
+import { doc } from 'firebase/firestore';
 import { Button } from '../ui/button';
 import {
   DropdownMenu,
@@ -18,12 +19,21 @@ import {
   DropdownMenuSubContent,
 } from "@/components/ui/dropdown-menu"
 import { useTheme } from '@/components/theme-provider';
+import { Skeleton } from '../ui/skeleton';
 
+interface UserProfile {
+  username: string;
+  email: string;
+}
 
 export function Header() {
   const { user, isUserLoading } = useUser();
+  const firestore = useFirestore();
   const auth = getAuth();
   const { setTheme } = useTheme();
+
+  const userDocRef = useMemoFirebase(() => user ? doc(firestore, 'users', user.uid) : null, [user, firestore]);
+  const { data: userProfile, isLoading: isProfileLoading } = useDoc<UserProfile>(userDocRef);
 
   const handleLogout = async () => {
     try {
@@ -45,8 +55,11 @@ export function Header() {
           <span className="font-headline sr-only sm:not-sr-only">DeepFake Defender</span>
         </Link>
         <div className="flex items-center gap-4">
-          {isUserLoading ? (
-            <div className="h-8 w-20 animate-pulse rounded-md bg-muted" />
+          {isUserLoading || isProfileLoading ? (
+             <div className="flex items-center gap-2">
+                <Skeleton className="h-8 w-24" />
+                <Skeleton className="h-8 w-8 rounded-full" />
+            </div>
           ) : user ? (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
@@ -56,8 +69,21 @@ export function Header() {
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
-                <DropdownMenuLabel>{user.email}</DropdownMenuLabel>
+                <DropdownMenuLabel className="font-normal">
+                  <div className="flex flex-col space-y-1">
+                    <p className="text-sm font-medium leading-none">{userProfile?.username}</p>
+                    <p className="text-xs leading-none text-muted-foreground">
+                      {user.email}
+                    </p>
+                  </div>
+                </DropdownMenuLabel>
                 <DropdownMenuSeparator />
+                  <DropdownMenuItem asChild>
+                    <Link href="/profile">
+                      <Edit className="mr-2 h-4 w-4" />
+                      <span>Profile</span>
+                    </Link>
+                  </DropdownMenuItem>
                   <DropdownMenuSub>
                     <DropdownMenuSubTrigger>
                       <Sun className="h-[1.2rem] w-[1.2rem] rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
