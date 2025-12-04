@@ -5,9 +5,16 @@ import Image from 'next/image';
 import type { ClassifyGanFingerprintOutput } from '@/lib/types';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { FileUploader } from './file-uploader';
-import { Fingerprint, RefreshCcw, X } from 'lucide-react';
+import { Fingerprint, RefreshCcw, X, Info } from 'lucide-react';
 import { Button } from '../ui/button';
 import { Progress } from '../ui/progress';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip"
+
 
 interface GanAnalysisProps {
   fileDataUri: string | null;
@@ -83,10 +90,22 @@ export function GanAnalysis({ fileDataUri, result, isLoading, onFileSelect, rese
                                     <p className="text-sm text-muted-foreground">Source Model</p>
                                     <p className="text-3xl font-bold">{result.sourceModel || 'Unknown'}</p>
                                 </div>
-                                <div className="text-center py-4 rounded-lg bg-muted">
-                                    <p className="text-sm text-muted-foreground">Confidence</p>
-                                    <p className="text-3xl font-bold">{Math.round((result.confidence || 0) * 100)}%</p>
-                                </div>
+                                <TooltipProvider>
+                                  <div className="text-center py-4 rounded-lg bg-muted">
+                                      <Tooltip>
+                                        <TooltipTrigger asChild>
+                                          <div className="flex items-center justify-center gap-1 cursor-help">
+                                              <p className="text-sm text-muted-foreground">Confidence</p>
+                                              <Info className="h-3 w-3 text-muted-foreground" />
+                                          </div>
+                                        </TooltipTrigger>
+                                        <TooltipContent>
+                                          <p className="max-w-xs">The confidence score represents how certain the AI model is about its classification. A high score means the model found strong evidence pointing to a specific generative model.</p>
+                                        </TooltipContent>
+                                      </Tooltip>
+                                      <p className="text-3xl font-bold">{Math.round((result.confidence || 0) * 100)}%</p>
+                                  </div>
+                                </TooltipProvider>
                             </div>
 
                             {forensicIndicators.length > 0 && (
@@ -118,7 +137,7 @@ export function GanAnalysis({ fileDataUri, result, isLoading, onFileSelect, rese
         
         {!isLoading && !result && !fileDataUri && (
           <div className="flex flex-col items-center justify-center h-full text-center p-8 border border-dashed rounded-lg bg-card text-muted-foreground">
-              <p>Upload a file to see the GAN fingerprint analysis.</p>
+              <p>Upload a media file to see the GAN fingerprint analysis.</p>
           </div>
         )}
       </CardContent>
