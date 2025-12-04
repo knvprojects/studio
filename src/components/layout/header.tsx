@@ -1,10 +1,11 @@
 'use client';
 
-import { ShieldCheck, LogOut, Moon, Sun } from 'lucide-react';
+import { useState, useRef, useEffect } from 'react';
+import { ShieldCheck, LogOut, Moon, Sun, Check, Edit } from 'lucide-react';
 import Link from 'next/link';
 import { useUser, useFirestore, useDoc, useMemoFirebase } from '@/firebase';
 import { getAuth, signOut } from 'firebase/auth';
-import { doc } from 'firebase/firestore';
+import { doc, updateDoc } from 'firebase/firestore';
 import { Button } from '../ui/button';
 import {
   DropdownMenu,
@@ -21,6 +22,8 @@ import {
 import { useTheme } from '@/components/theme-provider';
 import { Skeleton } from '../ui/skeleton';
 import { Avatar, AvatarFallback } from '../ui/avatar';
+import { Input } from '../ui/input';
+import { useToast } from '@/hooks/use-toast';
 
 
 interface UserProfile {
@@ -33,9 +36,20 @@ export function Header() {
   const firestore = useFirestore();
   const auth = getAuth();
   const { setTheme } = useTheme();
+  const { toast } = useToast();
 
+  const [isEditing, setIsEditing] = useState(false);
+  
   const userDocRef = useMemoFirebase(() => user ? doc(firestore, 'users', user.uid) : null, [user, firestore]);
   const { data: userProfile, isLoading: isProfileLoading } = useDoc<UserProfile>(userDocRef);
+
+  const [newUsername, setNewUsername] = useState(userProfile?.username || '');
+
+  useEffect(() => {
+    if (userProfile?.username) {
+      setNewUsername(userProfile.username);
+    }
+  }, [userProfile?.username]);
 
   const handleLogout = async () => {
     try {
@@ -43,6 +57,43 @@ export function Header() {
       // You can add a toast notification here if you want
     } catch (error) {
       console.error("Error signing out: ", error);
+    }
+  };
+
+  const handleUsernameUpdate = async () => {
+    if (!user || !userDocRef) return;
+    if (newUsername.trim().length < 3) {
+      toast({
+        variant: 'destructive',
+        title: 'Invalid Username',
+        description: 'Username must be at least 3 characters long.',
+      });
+      return;
+    }
+
+    try {
+      await updateDoc(userDocRef, { username: newUsername.trim() });
+      toast({
+        title: 'Success!',
+        description: 'Your username has been updated.',
+      });
+      setIsEditing(false);
+    } catch (error) {
+      console.error('Error updating username:', error);
+      toast({
+        variant: 'destructive',
+        title: 'Update Failed',
+        description: 'Could not update your username. Please try again.',
+      });
+    }
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      handleUsernameUpdate();
+    } else if (e.key === 'Escape') {
+      setIsEditing(false);
+      setNewUsername(userProfile?.username || '');
     }
   };
 
@@ -65,7 +116,7 @@ export function Header() {
                 <Skeleton className="h-8 w-8 rounded-full" />
             </div>
           ) : user ? (
-            <DropdownMenu>
+            <DropdownMenu onOpenChange={(open) => !open && setIsEditing(false)}>
               <DropdownMenuTrigger asChild>
                 <Button variant="secondary" size="icon" className="rounded-full">
                    <Avatar className="h-8 w-8">
@@ -77,7 +128,25 @@ export function Header() {
               <DropdownMenuContent align="end">
                 <DropdownMenuLabel className="font-normal">
                   <div className="flex flex-col space-y-1">
-                    <p className="text-sm font-bold leading-none">{username}</p>
+                    {isEditing ? (
+                      <div className="flex items-center gap-2">
+                        <Input 
+                          value={newUsername}
+                          onChange={(e) => setNewUsername(e.target.value)}
+                          onKeyDown={handleKeyDown}
+                          className="h-8"
+                          autoFocus
+                        />
+                        <Button variant="ghost" size="icon" className="h-8 w-8" onClick={handleUsernameUpdate}>
+                          <Check className="h-4 w-4"/>
+                        </Button>
+                      </div>
+                    ) : (
+                      <div className="flex items-center gap-2 group cursor-pointer" onClick={() => setIsEditing(true)}>
+                        <p className="text-sm font-bold leading-none">{username}</p>
+                        <Edit className="h-3 w-3 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
+                      </div>
+                    )}
                     <p className="text-xs leading-none text-muted-foreground">
                       {user.email}
                     </p>
