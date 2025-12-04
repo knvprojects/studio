@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useUser, useDoc, useFirestore } from '@/firebase';
+import { useUser, useDoc, useFirestore, useMemoFirebase } from '@/firebase';
 import { cn } from '@/lib/utils';
 import { ShieldCheck } from 'lucide-react';
 import { doc } from 'firebase/firestore';
@@ -17,7 +17,7 @@ interface UserProfile {
 export function WelcomeSplash({ onAnimationComplete }: WelcomeSplashProps) {
   const { user } = useUser();
   const firestore = useFirestore();
-  const userDocRef = user ? doc(firestore, 'users', user.uid) : null;
+  const userDocRef = useMemoFirebase(() => (user ? doc(firestore, 'users', user.uid) : null), [user, firestore]);
   const { data: userProfile } = useDoc<UserProfile>(userDocRef);
 
   const [animationState, setAnimationState] = useState<'initial' | 'fading-in' | 'animating-out' | 'done'>('initial');

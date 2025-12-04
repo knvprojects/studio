@@ -1,6 +1,6 @@
 'use client';
 
-import { ShieldCheck, LogOut, User as UserIcon, Moon, Sun, Edit } from 'lucide-react';
+import { ShieldCheck, LogOut, Moon, Sun, Edit } from 'lucide-react';
 import Link from 'next/link';
 import { useUser, useFirestore, useDoc, useMemoFirebase } from '@/firebase';
 import { getAuth, signOut } from 'firebase/auth';
@@ -20,6 +20,8 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { useTheme } from '@/components/theme-provider';
 import { Skeleton } from '../ui/skeleton';
+import { Avatar, AvatarFallback } from '../ui/avatar';
+
 
 interface UserProfile {
   username: string;
@@ -44,6 +46,9 @@ export function Header() {
     }
   };
 
+  const username = userProfile?.username || user?.email?.split('@')[0] || '';
+  const avatarFallback = username ? username.charAt(0).toUpperCase() : '';
+
   return (
     <header className="sticky top-0 z-50 flex h-16 items-center gap-4 border-b bg-background/95 px-4 backdrop-blur supports-[backdrop-filter]:bg-background/60 md:px-6">
       <nav className="flex w-full flex-row items-center justify-between gap-5 text-sm lg:gap-6">
@@ -57,21 +62,22 @@ export function Header() {
         <div className="flex items-center gap-4">
           {isUserLoading || isProfileLoading ? (
              <div className="flex items-center gap-2">
-                <Skeleton className="h-8 w-24" />
                 <Skeleton className="h-8 w-8 rounded-full" />
             </div>
           ) : user ? (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="secondary" size="icon" className="rounded-full">
-                  <UserIcon className="h-5 w-5" />
+                   <Avatar className="h-8 w-8">
+                     <AvatarFallback>{avatarFallback}</AvatarFallback>
+                   </Avatar>
                   <span className="sr-only">Toggle user menu</span>
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
                 <DropdownMenuLabel className="font-normal">
                   <div className="flex flex-col space-y-1">
-                    <p className="text-sm font-medium leading-none">{userProfile?.username}</p>
+                    <p className="text-sm font-bold leading-none">{userProfile?.username}</p>
                     <p className="text-xs leading-none text-muted-foreground">
                       {user.email}
                     </p>
