@@ -1,16 +1,25 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useUser } from '@/firebase';
+import { useUser, useDoc, useFirestore } from '@/firebase';
 import { cn } from '@/lib/utils';
 import { ShieldCheck } from 'lucide-react';
+import { doc } from 'firebase/firestore';
 
 interface WelcomeSplashProps {
   onAnimationComplete: () => void;
 }
 
+interface UserProfile {
+  username: string;
+}
+
 export function WelcomeSplash({ onAnimationComplete }: WelcomeSplashProps) {
   const { user } = useUser();
+  const firestore = useFirestore();
+  const userDocRef = user ? doc(firestore, 'users', user.uid) : null;
+  const { data: userProfile } = useDoc<UserProfile>(userDocRef);
+
   const [animationState, setAnimationState] = useState<'initial' | 'fading-in' | 'animating-out' | 'done'>('initial');
 
   useEffect(() => {
@@ -34,7 +43,7 @@ export function WelcomeSplash({ onAnimationComplete }: WelcomeSplashProps) {
     }
   }, [user, onAnimationComplete]);
 
-  const username = user?.email?.split('@')[0] || 'User';
+  const username = userProfile?.username || user?.email?.split('@')[0] || 'User';
   const capitalizedUsername = username.charAt(0).toUpperCase() + username.slice(1);
 
   return (

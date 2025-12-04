@@ -10,12 +10,13 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
 import { useRouter } from 'next/navigation';
-import { useAuth, useUser } from '@/firebase';
+import { useAuth, useUser, useFirestore } from '@/firebase';
 import { 
   createUserWithEmailAndPassword, 
   signInWithEmailAndPassword,
   type AuthError
 } from 'firebase/auth';
+import { doc, setDoc } from 'firebase/firestore';
 
 
 const loginSchema = z.object({
@@ -24,6 +25,7 @@ const loginSchema = z.object({
 });
 
 const registerSchema = z.object({
+  username: z.string().min(3, { message: 'Username must be at least 3 characters' }),
   email: z.string().email({ message: 'Invalid email address' }),
   password: z.string().min(6, { message: 'Password must be at least 6 characters' }),
   confirmPassword: z.string(),
@@ -43,6 +45,7 @@ export function AuthForm() {
   const { toast } = useToast();
   const router = useRouter();
   const auth = useAuth();
+  const firestore = useFirestore();
   const { user, isUserLoading } = useUser();
 
   const {
@@ -86,7 +89,17 @@ export function AuthForm() {
   const onRegister: SubmitHandler<RegisterValues> = async (data) => {
     setIsLoading(true);
     try {
-      await createUserWithEmailAndPassword(auth, data.email, data.password);
+      const userCredential = await createUserWithEmailAndPassword(auth, data.email, data.password);
+      const newUser = userCredential.user;
+
+      // Create a user document in Firestore
+      await setDoc(doc(firestore, "users", newUser.uid), {
+        id: newUser.uid,
+        username: data.username,
+        email: data.email,
+        registrationDate: new Date().toISOString(),
+      });
+
       toast({ title: 'Registration successful!', description: 'You can now log in.' });
       toggleView(); // Switch to login view after successful registration
     } catch (error) {
@@ -116,7 +129,7 @@ export function AuthForm() {
   }
 
   return (
-    <div className="relative w-full max-w-md h-[480px] overflow-hidden">
+    <div className="relative w-full max-w-md h-[540px] overflow-hidden">
       {/* Login Form */}
       <div
         className={cn(
@@ -167,6 +180,10 @@ export function AuthForm() {
           </CardHeader>
           <CardContent>
             <form onSubmit={handleRegisterSubmit(onRegister)} className="space-y-4">
+               <div className="space-y-2">
+                <Input {...registerRegister('username')} placeholder="Username" disabled={isLoading} />
+                {registerErrors.username && <p className="text-xs text-destructive">{registerErrors.username.message}</p>}
+              </div>
               <div className="space-y-2">
                 <Input {...registerRegister('email')} placeholder="Email" disabled={isLoading} />
                 {registerErrors.email && <p className="text-xs text-destructive">{registerErrors.email.message}</p>}
