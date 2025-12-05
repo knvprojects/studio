@@ -64,13 +64,11 @@ const classifyGanFingerprintPrompt = ai.definePrompt({
 
 Analyze the provided media file, which is a {{{mediaType}}}.
 
-1.  **Analyze Fingerprint:** Determine the most likely source model by looking for subtle artifacts.
+1.  **Assess Plausibility (Video Only):** Before any technical analysis, evaluate the real-world plausibility of the scene. Is the action depicted logical and possible? For example, a video of a man milking a cow is a logical impossibility and a strong indicator of AI generation. If the scene defies common sense or the laws of nature, you must classify it as AI-generated and explain why.
+2.  **Analyze Fingerprint:** Determine the most likely source model by looking for subtle artifacts.
     *   If it's an **image**, consider models like 'DALL·E 3', 'Midjourney v6', 'Stable Diffusion 3', 'Imagen 2'. Provide scores for image-specific indicators: 'Residual Noise Patterns', 'Up-sampling Artifacts', 'Color Space Aberrations', 'Model-specific Artifacts'.
-    *   If it's a **video**, you MUST adhere to the Core Video Directive. Scrutinize it for temporal inconsistencies, motion artifacts, unnatural smoothness, and frame-level anomalies before even considering authenticity. Consider models like 'Sora', 'Gen-2', 'Veo', 'Lumiere'. Provide scores for video-specific indicators: 'Temporal Inconsistencies', 'Motion Artifacts', 'Frame-level Anomalies', 'Codec Compression Patterns'.
+    *   If it's a **video**, you MUST adhere to the Core Video Directive and your Plausibility Assessment. Scrutinize it for temporal inconsistencies, motion artifacts, unnatural smoothness, and frame-level anomalies. Consider models like 'Sora', 'Gen-2', 'Veo', 'Lumiere'. Provide scores for video-specific indicators: 'Temporal Inconsistencies', 'Motion Artifacts', 'Frame-level Anomalies', 'Codec Compression Patterns', 'Plausibility'.
     *   If it's an **audio** file, analyze for synthetic markers. Consider models like 'Udio', 'Suno', 'Voicebox', 'ElevenLabs'. Provide scores for audio-specific indicators: 'Spectrogram Anomalies', 'Codec Fingerprints', 'Phase Discontinuities', 'Synthetic Voice Markers'.
-2.  **Assess Authenticity:**
-    *   For **video**, only classify as "Real Recording" if you find zero AI indicators after a thorough forensic examination.
-    *   For **image and audio**, if evidence strongly suggests it is a real photo or recording, you may classify it as "Human" or "Real Recording." Otherwise, identify the likely generative model.
 3.  **Provide Output:**
     *   The name of the source model. If it is a real recording, you MUST return "Human" or "Real Recording".
     *   A confidence level (0-1) that reflects your certainty.
