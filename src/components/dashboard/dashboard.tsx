@@ -25,7 +25,8 @@ type VideoAnalysisState = {
 };
 
 type AudioAnalysisState = {
-  fileDataUri: string | null;
+  fileDataUri: string |
+ null;
   result: AudioAnalysisResult | null;
   isLoading: boolean;
 };
@@ -127,7 +128,10 @@ export function Dashboard() {
     setGanState({ fileDataUri: dataUri, result: null, isLoading: true });
 
     try {
-      const analysisResult = await handleGanFingerprintAnalysis(dataUri);
+      const fileType = file.type.split('/')[0];
+      const mediaType = fileType === 'image' || fileType === 'video' || fileType === 'audio' ? fileType : 'image';
+      
+      const analysisResult = await handleGanFingerprintAnalysis(dataUri, mediaType);
       setGanState((s) => ({...s, result: analysisResult, isLoading: false }));
     } catch (error) {
       toast({

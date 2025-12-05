@@ -48,10 +48,11 @@ export async function handleAudioAnalysis(
 }
 
 export async function handleGanFingerprintAnalysis(
-  mediaDataUri: string
+  mediaDataUri: string,
+  mediaType: 'image' | 'video' | 'audio'
 ): Promise<ClassifyGanFingerprintOutput> {
   try {
-    const analysis = await classifyGanFingerprint({ mediaDataUri });
+    const analysis = await classifyGanFingerprint({ mediaDataUri, mediaType });
     return analysis;
   } catch (error) {
     console.error("GAN fingerprint analysis failed:", error);
