@@ -49,17 +49,16 @@ export function WelcomeSplash({ onAnimationComplete }: WelcomeSplashProps) {
   return (
     <div 
       className={cn(
-        "fixed inset-0 z-50 flex items-center justify-center bg-background transition-opacity duration-500",
-        animationState === 'animating-out' && 'opacity-0',
-        animationState !== 'animating-out' && 'opacity-100'
+        "fixed inset-0 z-50 flex items-center justify-center bg-background transition-opacity duration-1000",
+        animationState === 'animating-out' ? 'opacity-0' : 'opacity-100',
       )}
     >
       <div 
         className={cn(
           "flex flex-col items-center gap-4 text-foreground transition-all duration-1000 ease-in-out",
-          animationState === 'fading-in' && 'opacity-100 scale-100 blur-0',
-          animationState === 'initial' && 'opacity-0 scale-95 blur-sm',
-          animationState === 'animating-out' && 'opacity-0 scale-75 blur-md',
+          animationState === 'initial' && 'opacity-0 scale-95',
+          animationState === 'fading-in' && 'opacity-100 scale-100',
+          animationState === 'animating-out' && 'opacity-0 scale-50 translate-x-[200%] -translate-y-[200%]'
         )}
       >
         <ShieldCheck className="h-16 w-16 text-primary" />
