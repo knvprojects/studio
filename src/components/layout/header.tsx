@@ -5,7 +5,7 @@ import { ShieldCheck, LogOut, Moon, Sun, Check, Edit } from 'lucide-react';
 import Link from 'next/link';
 import { useUser, useFirestore, useDoc, useMemoFirebase } from '@/firebase';
 import { getAuth, signOut } from 'firebase/auth';
-import { doc, updateDoc } from 'firebase/firestore';
+import { doc, updateDoc, getDoc, setDoc } from 'firebase/firestore';
 import { Button } from '../ui/button';
 import {
   DropdownMenu,
@@ -72,7 +72,18 @@ export function Header() {
     }
 
     try {
-      await updateDoc(userDocRef, { username: newUsername.trim() });
+      const docSnap = await getDoc(userDocRef);
+      if (docSnap.exists()) {
+        await updateDoc(userDocRef, { username: newUsername.trim() });
+      } else {
+        // Doc doesn't exist, create it first, then update (or just set with merge)
+        await setDoc(userDocRef, { 
+          id: user.uid,
+          username: newUsername.trim(),
+          email: user.email,
+          registrationDate: new Date().toISOString(),
+        }, { merge: true });
+      }
       toast({
         title: 'Success!',
         description: 'Your username has been updated.',
