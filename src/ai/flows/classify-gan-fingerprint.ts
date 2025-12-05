@@ -58,20 +58,22 @@ const classifyGanFingerprintPrompt = ai.definePrompt({
   name: 'classifyGanFingerprintPrompt',
   input: {schema: ClassifyGanFingerprintInputSchema},
   output: {schema: ClassifyGanFingerprintOutputSchema},
-  prompt: `You are an expert in identifying the source of AI-generated media by analyzing generative model fingerprints for a specific media type.
+  prompt: `You are an expert in identifying the source of AI-generated media by analyzing generative model fingerprints.
 
-**Core Directive: Your task is to differentiate between authentic media and sophisticated AI-generated media. While real-world content has natural imperfections, high-quality AI generation can mimic reality. You must perform a deep forensic analysis before concluding that a file is a "Real Recording."**
+**Core Video Directive: For video analysis, you MUST operate under the assumption that the video is AI-generated. Your primary task is to find evidence of AI synthesis. Only classify a video as a "Real Recording" if, after deep forensic analysis, there is a total absence of AI artifacts. High visual quality is NOT sufficient proof of authenticity.**
 
 Analyze the provided media file, which is a {{{mediaType}}}.
 
 1.  **Analyze Fingerprint:** Determine the most likely source model by looking for subtle artifacts.
     *   If it's an **image**, consider models like 'DALL·E 3', 'Midjourney v6', 'Stable Diffusion 3', 'Imagen 2'. Provide scores for image-specific indicators: 'Residual Noise Patterns', 'Up-sampling Artifacts', 'Color Space Aberrations', 'Model-specific Artifacts'.
-    *   If it's a **video**, you MUST prioritize deepfake analysis. High-quality AI video can look real. Scrutinize it for AI indicators before classifying it as a "Real Recording." Consider models like 'Sora', 'Gen-2', 'Veo', 'Lumiere'. Provide scores for video-specific indicators: 'Temporal Inconsistencies', 'Motion Artifacts', 'Frame-level Anomalies', 'Codec Compression Patterns'.
-    *   If it's an **audio** file, consider models like 'Udio', 'Suno', 'Voicebox', 'ElevenLabs'. Provide scores for audio-specific indicators: 'Spectrogram Anomalies', 'Codec Fingerprints', 'Phase Discontinuities', 'Synthetic Voice Markers'.
-2.  **Assess Authenticity:** Based on the forensic analysis, is this AI-generated or a real recording/photo? If the evidence strongly suggests it's a real recording (e.g., clear, verifiable context with no AI artifacts), you may classify it as "Human" or "Real Recording." Otherwise, identify the likely generative model.
+    *   If it's a **video**, you MUST adhere to the Core Video Directive. Scrutinize it for temporal inconsistencies, motion artifacts, unnatural smoothness, and frame-level anomalies before even considering authenticity. Consider models like 'Sora', 'Gen-2', 'Veo', 'Lumiere'. Provide scores for video-specific indicators: 'Temporal Inconsistencies', 'Motion Artifacts', 'Frame-level Anomalies', 'Codec Compression Patterns'.
+    *   If it's an **audio** file, analyze for synthetic markers. Consider models like 'Udio', 'Suno', 'Voicebox', 'ElevenLabs'. Provide scores for audio-specific indicators: 'Spectrogram Anomalies', 'Codec Fingerprints', 'Phase Discontinuities', 'Synthetic Voice Markers'.
+2.  **Assess Authenticity:**
+    *   For **video**, only classify as "Real Recording" if you find zero AI indicators after a thorough forensic examination.
+    *   For **image and audio**, if evidence strongly suggests it is a real photo or recording, you may classify it as "Human" or "Real Recording." Otherwise, identify the likely generative model.
 3.  **Provide Output:**
     *   The name of the source model. If it is a real recording, you MUST return "Human" or "Real Recording".
-    *   A confidence level (0-1) that reflects your certainty in the classification.
+    *   A confidence level (0-1) that reflects your certainty.
     *   A list of scores for the forensic indicators relevant to the media type.
     *   Additional details about your analysis and the evidence found.
 
